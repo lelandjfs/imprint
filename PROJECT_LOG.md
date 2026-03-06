@@ -76,15 +76,16 @@ _None - V1 ingestion complete._
 | 2025-03-04 | Added ad/tracking content cleaner (40% reduction on newsletters) |
 | 2025-03-04 | Built vision pipeline with GPT-4o (extracts charts/graphs from PDFs) |
 | 2025-03-05 | Added Parallel Search API fallback for bot-protected sites (Seeking Alpha, etc.) |
+| 2025-03-06 | Pushed to GitHub (lelandjfs/imprint) with .gitignore for credentials |
 
 ---
 
 ## Future Work
 
 **Infrastructure:**
-- [ ] Push to GitHub (private repo)
+- [x] Push to GitHub — https://github.com/lelandjfs/imprint — DONE
+- [x] Add .gitignore for credentials (.env, token.json, credentials.json) — DONE
 - [ ] Daily cron job or GitHub Action to check all sources for new content
-- [ ] Add .gitignore for credentials (.env, token.json, credentials.json)
 
 **Ingestion Enhancements:**
 - [x] Vision pipeline (Drive `Imprint/Vision/` folder) — GPT-4o for charts/screenshots — DONE
