@@ -28,7 +28,10 @@ Build a searchable library of research content with tagging and semantic search.
 
 ## Active Work
 
-_None - V1 ingestion complete._
+**Chatbot V1 - Ready for Deployment**
+- Backend built (FastAPI + LangChain)
+- Frontend built (Next.js + Tailwind)
+- Next: Deploy to Render + Vercel
 
 ---
 
@@ -41,7 +44,10 @@ _None - V1 ingestion complete._
 | `ingest_pdf.py` | Google Drive PDF ingestion |
 | `ingest_vision.py` | GPT-4o vision for charts/screenshots |
 | `ingest_all.py` | Master script - runs all + sends email |
-| `run_ingestion.sh` | Cron wrapper - runs daily at 7am |
+| `run_ingestion.sh` | Cron wrapper - runs daily at 9pm |
+| `api/` | FastAPI backend for chatbot |
+| `web/` | Next.js frontend for chatbot |
+| `DEPLOYMENT.md` | Deployment guide for Render + Vercel |
 | `review.py` | CLI for reviewing/approving tags |
 | `imprint_utils.py` | Shared utilities (logging, email, cleaning) |
 
@@ -82,6 +88,8 @@ _None - V1 ingestion complete._
 | 2025-03-06 | Pushed to GitHub (lelandjfs/imprint) with .gitignore for credentials |
 | 2025-03-06 | Added duplicate detection to all 4 pipelines (checks source_url before ingesting) |
 | 2025-03-06 | Set up launchd for daily ingestion at 9pm (catches up if Mac was asleep) |
+| 2025-03-06 | Built FastAPI backend with LangChain RAG pipeline |
+| 2025-03-06 | Built Next.js frontend with chat UI, filters, and model selector |
 
 ---
 
@@ -98,6 +106,7 @@ _None - V1 ingestion complete._
 - [x] Parallel Search fallback for bot-protected sites — DONE
 
 **Query & Review:**
-- [ ] Chatbot for querying knowledge base
-- [ ] Web UI with pending tags tab
+- [x] Chatbot for querying knowledge base — FastAPI + Next.js — DONE
+- [ ] Deploy to Render + Vercel
+- [ ] Web UI for reviewing pending tags
 - [ ] Reply-to-approve email flow
