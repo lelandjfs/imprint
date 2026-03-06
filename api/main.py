@@ -3,8 +3,8 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.config import get_settings
-from api.routers import chat, filters
+from config import get_settings
+from routers import chat, filters
 
 
 # Set up LangSmith tracing if enabled

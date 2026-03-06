@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 from supabase import create_client
-from api.config import get_settings
+from config import get_settings
 
 
 router = APIRouter(prefix="/api", tags=["filters"])

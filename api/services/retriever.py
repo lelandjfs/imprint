@@ -6,7 +6,7 @@ from langchain_core.retrievers import BaseRetriever
 from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from langchain_openai import OpenAIEmbeddings
 from supabase import create_client, Client
-from api.config import get_settings
+from config import get_settings
 
 
 class ImprintRetriever(BaseRetriever):

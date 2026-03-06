@@ -5,8 +5,8 @@ from typing import Optional, List
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from api.services.rag_chain import stream_rag_response
-from api.services.memory import memory_store
+from services.rag_chain import stream_rag_response
+from services.memory import memory_store
 
 
 router = APIRouter(prefix="/api", tags=["chat"])

@@ -8,7 +8,7 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage
 from langchain.chains import create_history_aware_retriever
-from api.services.retriever import create_retriever
+from services.retriever import create_retriever
 
 
 def get_llm(model: str, streaming: bool = False):
