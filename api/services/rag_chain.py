@@ -3,11 +3,9 @@
 from typing import List, Optional, AsyncIterator
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage
-from langchain.chains import create_history_aware_retriever
 from services.retriever import create_retriever
 
 
@@ -77,18 +75,18 @@ async def stream_rag_response(
         filter_entities=filter_entities,
     )
 
-    # Create history-aware retriever (rephrases question if needed)
-    llm_for_condensing = get_llm(model, streaming=False)
-    history_aware_retriever = create_history_aware_retriever(
-        llm_for_condensing,
-        retriever,
-        condense_question_prompt,
-    )
+    # Condense question if there's chat history
+    standalone_question = question
+    if chat_history:
+        llm_for_condensing = get_llm(model, streaming=False)
+        condense_chain = condense_question_prompt | llm_for_condensing | StrOutputParser()
+        standalone_question = await condense_chain.ainvoke({
+            "input": question,
+            "chat_history": chat_history
+        })
 
-    # Retrieve documents
-    docs = await history_aware_retriever.ainvoke(
-        {"input": question, "chat_history": chat_history}
-    )
+    # Retrieve documents using standalone question
+    docs = await retriever.ainvoke(standalone_question)
 
     # Yield sources first
     sources = [
