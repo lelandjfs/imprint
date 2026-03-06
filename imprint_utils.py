@@ -26,6 +26,25 @@ def get_db_connection():
     return psycopg2.connect(os.environ['DATABASE_URL'])
 
 
+def document_exists(source_url):
+    """Check if a document with this source_url already exists."""
+    if not source_url:
+        return False
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id FROM imprint_documents WHERE source_url = %s LIMIT 1
+    """, (source_url,))
+
+    exists = cur.fetchone() is not None
+    cur.close()
+    conn.close()
+
+    return exists
+
+
 def log_ingestion(source_type, source_identifier, status, error_message=None, document_id=None):
     """Log an ingestion attempt."""
     conn = get_db_connection()

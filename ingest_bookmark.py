@@ -12,7 +12,7 @@ import requests
 from openai import OpenAI
 import anthropic
 import psycopg2
-from imprint_utils import log_ingestion, clean_ad_content
+from imprint_utils import log_ingestion, clean_ad_content, document_exists
 
 # Load environment
 with open(os.path.join(os.path.dirname(__file__), '.env')) as f:
@@ -277,6 +277,12 @@ def process_bookmark(bookmark):
     """Process a single bookmark through the full pipeline."""
     url = bookmark['url']
     title = bookmark['title']
+
+    # Check for duplicate
+    if document_exists(url):
+        print(f"  ⏭ Already ingested: {url[:50]}...")
+        return None
+
     url_type = detect_url_type(url)
 
     print(f"  URL: {url[:70]}...")

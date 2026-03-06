@@ -13,7 +13,7 @@ from googleapiclient.discovery import build
 from openai import OpenAI
 import anthropic
 import psycopg2
-from imprint_utils import log_ingestion
+from imprint_utils import log_ingestion, document_exists
 
 # Load environment
 with open(os.path.join(os.path.dirname(__file__), '.env')) as f:
@@ -224,6 +224,12 @@ def process_vision_file(file_info):
     file_id = file_info['id']
     filename = file_info['name']
     mime_type = file_info['mimeType']
+    source_url = f"https://drive.google.com/file/d/{file_id}"
+
+    # Check for duplicate
+    if document_exists(source_url):
+        print(f"  ⏭ Already ingested: {filename}")
+        return None
 
     print(f"  File: {filename}")
     print(f"  Size: {int(file_info.get('size', 0)) / 1024:.1f} KB")

@@ -13,7 +13,7 @@ from googleapiclient.discovery import build
 from openai import OpenAI
 import anthropic
 import psycopg2
-from imprint_utils import log_ingestion, clean_pdf_content
+from imprint_utils import log_ingestion, clean_pdf_content, document_exists
 
 # Load environment
 with open(os.path.join(os.path.dirname(__file__), '.env')) as f:
@@ -210,6 +210,12 @@ def process_pdf(file_info):
     """Process a single PDF through the full pipeline."""
     file_id = file_info['id']
     filename = file_info['name']
+    source_url = f"https://drive.google.com/file/d/{file_id}"
+
+    # Check for duplicate
+    if document_exists(source_url):
+        print(f"  ⏭ Already ingested: {filename}")
+        return None
 
     print(f"  File: {filename}")
     print(f"  Size: {int(file_info.get('size', 0)) / 1024:.1f} KB")

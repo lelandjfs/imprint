@@ -13,7 +13,7 @@ from googleapiclient.discovery import build
 from openai import OpenAI
 import anthropic
 import psycopg2
-from imprint_utils import log_ingestion, clean_ad_content
+from imprint_utils import log_ingestion, clean_ad_content, document_exists
 
 # Load environment
 with open(os.path.join(os.path.dirname(__file__), '.env')) as f:
@@ -245,6 +245,12 @@ def store_document(document, tags, embedding):
 
 def process_email(msg_id):
     """Process a single email through the full pipeline."""
+    # Check for duplicate
+    source_url = f"gmail://{msg_id}"
+    if document_exists(source_url):
+        print(f"  ⏭ Already ingested, skipping")
+        return None
+
     print(f"  Fetching email {msg_id}...")
     msg = gmail.users().messages().get(userId='me', id=msg_id, format='full').execute()
 
@@ -262,6 +268,7 @@ def process_email(msg_id):
     # Parse forwarded email
     print(f"  Parsing email content...")
     document = parse_forwarded_email(body, headers)
+    document['source_url'] = source_url  # For duplicate detection
     print(f"  Title: {document['title'][:60]}...")
     print(f"  Author: {document.get('author', 'Unknown')}")
     print(f"  Raw content length: {len(document['content'])} chars")

@@ -59,6 +59,8 @@ _None - V1 ingestion complete._
 | 2025-03-03 | Email notifications after ingestion | Summary sent to Gmail |
 | 2025-03-03 | pending_review status | Docs await approval before active |
 | 2025-03-05 | Parallel Search as fallback | Better at bypassing bot detection than Jina |
+| 2025-03-06 | Duplicate detection via source_url | Safe to run multiple times |
+| 2025-03-06 | launchd over cron | Catches up on missed runs when Mac wakes |
 
 ---
 
@@ -78,7 +80,8 @@ _None - V1 ingestion complete._
 | 2025-03-04 | Built vision pipeline with GPT-4o (extracts charts/graphs from PDFs) |
 | 2025-03-05 | Added Parallel Search API fallback for bot-protected sites (Seeking Alpha, etc.) |
 | 2025-03-06 | Pushed to GitHub (lelandjfs/imprint) with .gitignore for credentials |
-| 2025-03-06 | Set up daily cron job at 7am for automated ingestion |
+| 2025-03-06 | Added duplicate detection to all 4 pipelines (checks source_url before ingesting) |
+| 2025-03-06 | Set up launchd for daily ingestion at 9pm (catches up if Mac was asleep) |
 
 ---
 
@@ -87,7 +90,7 @@ _None - V1 ingestion complete._
 **Infrastructure:**
 - [x] Push to GitHub — https://github.com/lelandjfs/imprint — DONE
 - [x] Add .gitignore for credentials (.env, token.json, credentials.json) — DONE
-- [x] Daily cron job at 7am — `run_ingestion.sh` — DONE
+- [x] Daily launchd job at 9pm — catches up if Mac was asleep — DONE
 
 **Ingestion Enhancements:**
 - [x] Vision pipeline (Drive `Imprint/Vision/` folder) — GPT-4o for charts/screenshots — DONE
