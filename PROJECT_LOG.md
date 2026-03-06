@@ -41,6 +41,7 @@ _None - V1 ingestion complete._
 | `ingest_pdf.py` | Google Drive PDF ingestion |
 | `ingest_vision.py` | GPT-4o vision for charts/screenshots |
 | `ingest_all.py` | Master script - runs all + sends email |
+| `run_ingestion.sh` | Cron wrapper - runs daily at 7am |
 | `review.py` | CLI for reviewing/approving tags |
 | `imprint_utils.py` | Shared utilities (logging, email, cleaning) |
 
@@ -77,6 +78,7 @@ _None - V1 ingestion complete._
 | 2025-03-04 | Built vision pipeline with GPT-4o (extracts charts/graphs from PDFs) |
 | 2025-03-05 | Added Parallel Search API fallback for bot-protected sites (Seeking Alpha, etc.) |
 | 2025-03-06 | Pushed to GitHub (lelandjfs/imprint) with .gitignore for credentials |
+| 2025-03-06 | Set up daily cron job at 7am for automated ingestion |
 
 ---
 
@@ -85,7 +87,7 @@ _None - V1 ingestion complete._
 **Infrastructure:**
 - [x] Push to GitHub — https://github.com/lelandjfs/imprint — DONE
 - [x] Add .gitignore for credentials (.env, token.json, credentials.json) — DONE
-- [ ] Daily cron job or GitHub Action to check all sources for new content
+- [x] Daily cron job at 7am — `run_ingestion.sh` — DONE
 
 **Ingestion Enhancements:**
 - [x] Vision pipeline (Drive `Imprint/Vision/` folder) — GPT-4o for charts/screenshots — DONE
