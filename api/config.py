@@ -22,8 +22,8 @@ class Settings(BaseSettings):
     langsmith_tracing: bool = False
     langsmith_project: str = "imprint-chatbot"
 
-    # CORS
-    cors_origins: list[str] = ["http://localhost:3000", "https://*.vercel.app"]
+    # CORS - can be set via CORS_ORIGINS env var as comma-separated list
+    cors_origins: str = "http://localhost:3000,https://imprint-ruddy.vercel.app"
 
     class Config:
         env_file = "../.env"
