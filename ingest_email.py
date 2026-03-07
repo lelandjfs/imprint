@@ -245,12 +245,6 @@ def store_document(document, tags, embedding):
 
 def process_email(msg_id):
     """Process a single email through the full pipeline."""
-    # Check for duplicate
-    source_url = f"gmail://{msg_id}"
-    if document_exists(source_url):
-        print(f"  ⏭ Already ingested, skipping")
-        return None
-
     print(f"  Fetching email {msg_id}...")
     msg = gmail.users().messages().get(userId='me', id=msg_id, format='full').execute()
 
@@ -268,9 +262,14 @@ def process_email(msg_id):
     # Parse forwarded email
     print(f"  Parsing email content...")
     document = parse_forwarded_email(body, headers)
-    document['source_url'] = source_url  # For duplicate detection
+    document['source_url'] = f"gmail://{msg_id}"
     print(f"  Title: {document['title'][:60]}...")
     print(f"  Author: {document.get('author', 'Unknown')}")
+
+    # Check for duplicate (by source_url AND title)
+    if document_exists(document['source_url'], document['title']):
+        print(f"  ⏭ Already ingested (same title or source), skipping")
+        return None
     print(f"  Raw content length: {len(document['content'])} chars")
 
     # Clean ad content

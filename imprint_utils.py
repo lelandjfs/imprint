@@ -26,23 +26,49 @@ def get_db_connection():
     return psycopg2.connect(os.environ['DATABASE_URL'])
 
 
-def document_exists(source_url):
-    """Check if a document with this source_url already exists."""
+def document_exists(source_url, title=None):
+    """
+    Check if a document already exists.
+
+    Args:
+        source_url: URL/identifier for this source (required)
+        title: Document title (optional). If provided, checks both source_url AND title.
+               This prevents the same article from being ingested from multiple sources.
+
+    Returns:
+        bool: True if document exists, False otherwise
+    """
     if not source_url:
         return False
 
     conn = get_db_connection()
     cur = conn.cursor()
 
+    # Check by source_url first (exact match)
     cur.execute("""
         SELECT id FROM imprint_documents WHERE source_url = %s LIMIT 1
     """, (source_url,))
 
-    exists = cur.fetchone() is not None
+    if cur.fetchone() is not None:
+        cur.close()
+        conn.close()
+        return True
+
+    # If title provided, also check for title matches
+    # This prevents duplicates from different sources (e.g., PDF + image of same article)
+    if title:
+        cur.execute("""
+            SELECT id FROM imprint_documents WHERE title = %s LIMIT 1
+        """, (title,))
+
+        if cur.fetchone() is not None:
+            cur.close()
+            conn.close()
+            return True
+
     cur.close()
     conn.close()
-
-    return exists
+    return False
 
 
 def log_ingestion(source_type, source_identifier, status, error_message=None, document_id=None):

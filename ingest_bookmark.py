@@ -278,9 +278,9 @@ def process_bookmark(bookmark):
     url = bookmark['url']
     title = bookmark['title']
 
-    # Check for duplicate
-    if document_exists(url):
-        print(f"  ⏭ Already ingested: {url[:50]}...")
+    # Check for duplicate (by source_url AND title)
+    if document_exists(url, title):
+        print(f"  ⏭ Already ingested (same title or source): {url[:50]}...")
         return None
 
     url_type = detect_url_type(url)

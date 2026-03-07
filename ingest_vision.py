@@ -226,9 +226,12 @@ def process_vision_file(file_info):
     mime_type = file_info['mimeType']
     source_url = f"https://drive.google.com/file/d/{file_id}"
 
-    # Check for duplicate
-    if document_exists(source_url):
-        print(f"  ⏭ Already ingested: {filename}")
+    # Parse title from filename for deduplication
+    title = filename.replace('.pdf', '').replace('.png', '').replace('.jpg', '').replace('-', ' ')
+
+    # Check for duplicate (by source_url AND title)
+    if document_exists(source_url, title):
+        print(f"  ⏭ Already ingested (same title or source): {filename}")
         return None
 
     print(f"  File: {filename}")
