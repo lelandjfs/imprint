@@ -6,7 +6,7 @@ import { Message, ChatFilters, FilterOptions, Document, ModelInfo } from "@/lib/
 import { streamChat, getFilters, getModels } from "@/lib/api";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
-import FilterSidebar from "./FilterSidebar";
+import FilterSidebarModern from "./FilterSidebarModern";
 import SourcesPanel from "./SourcesPanel";
 
 export default function ChatInterface() {
@@ -100,9 +100,9 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full">
       {/* Filter Sidebar */}
-      <FilterSidebar
+      <FilterSidebarModern
         filters={filters}
         filterOptions={filterOptions}
         onFiltersChange={setFilters}
@@ -110,15 +110,14 @@ export default function ChatInterface() {
       />
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-white">
         {/* Header */}
-        <div className="border-b border-gray-200 p-4 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Imprint Chat</h1>
-          <div className="flex items-center gap-4">
+        <div className="border-b border-gray-200 p-4 flex items-center justify-between bg-white">
+          <div className="flex items-center gap-3">
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="rounded border border-gray-300 px-3 py-1 text-sm"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               {models.map((model) => (
                 <option key={model.id} value={model.id}>
@@ -126,13 +125,13 @@ export default function ChatInterface() {
                 </option>
               ))}
             </select>
-            <button
-              onClick={() => setSourcesOpen(!sourcesOpen)}
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              {sourcesOpen ? "Hide" : "Show"} Sources
-            </button>
           </div>
+          <button
+            onClick={() => setSourcesOpen(!sourcesOpen)}
+            className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+          >
+            {sourcesOpen ? "Hide" : "Show"} Sources
+          </button>
         </div>
 
         {/* Messages */}

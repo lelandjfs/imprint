@@ -16,7 +16,7 @@ class ImprintRetriever(BaseRetriever):
     embeddings: OpenAIEmbeddings
     k: int = 5
     filter_thesis: Optional[str] = None
-    filter_sector: Optional[str] = None
+    filter_sector: Optional[List[str]] = None  # Changed to List for multi-select
     filter_entities: Optional[List[str]] = None
     filter_status: str = "active"
 
