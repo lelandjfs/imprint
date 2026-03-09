@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from imprint_utils import get_db_connection, mark_document_reviewed
+from utils import get_db_connection, mark_document_reviewed
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 
