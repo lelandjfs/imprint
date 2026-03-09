@@ -14,8 +14,8 @@ export default function Home() {
       {/* Header with Tabs */}
       <div className="border-b border-gray-200 bg-white shadow-sm">
         <div className="flex items-center justify-between px-6 py-3">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Imprint
+          <h1 className="text-2xl font-semibold text-gray-600 tracking-tight">
+            imprint
           </h1>
           <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
             <button

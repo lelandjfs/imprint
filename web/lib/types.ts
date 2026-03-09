@@ -22,7 +22,7 @@ export interface Document {
 }
 
 export interface ChatFilters {
-  thesis?: string | null;
+  thesis?: string[] | null;
   sector?: string[] | null;
   entities?: string[] | null;
   date_range?: {

@@ -1,9 +1,9 @@
--- Update match_imprint_documents to support multi-sector filtering
+-- Update match_imprint_documents to support multi-select filtering
 CREATE OR REPLACE FUNCTION match_imprint_documents(
     query_embedding VECTOR(1536),
     match_count INT DEFAULT 5,
-    filter_thesis TEXT DEFAULT NULL,
-    filter_sector TEXT[] DEFAULT NULL,  -- Changed to array
+    filter_thesis TEXT[] DEFAULT NULL,  -- Changed to array for multi-select
+    filter_sector TEXT[] DEFAULT NULL,  -- Changed to array for multi-select
     filter_entities TEXT[] DEFAULT NULL,
     filter_status TEXT DEFAULT 'active'
 )
@@ -35,8 +35,8 @@ BEGIN
         1 - (d.embedding <=> query_embedding) AS similarity
     FROM imprint_documents d
     WHERE d.status = filter_status
-      AND (filter_thesis IS NULL OR d.thesis = filter_thesis)
-      AND (filter_sector IS NULL OR d.sector = ANY(filter_sector))  -- Updated to use ANY
+      AND (filter_thesis IS NULL OR d.thesis = ANY(filter_thesis))  -- Updated to use ANY for multi-select
+      AND (filter_sector IS NULL OR d.sector = ANY(filter_sector))  -- Updated to use ANY for multi-select
       AND (filter_entities IS NULL OR d.entities && filter_entities)
     ORDER BY d.embedding <=> query_embedding
     LIMIT match_count;

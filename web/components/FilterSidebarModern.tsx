@@ -27,6 +27,14 @@ export default function FilterSidebarModern({
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const handleThesisChange = (thesis: string) => {
+    const currentTheses = filters.thesis || [];
+    const newTheses = currentTheses.includes(thesis)
+      ? currentTheses.filter((t) => t !== thesis)
+      : [...currentTheses, thesis];
+    onFiltersChange({ ...filters, thesis: newTheses.length > 0 ? newTheses : null });
+  };
+
   const handleSectorChange = (sector: string) => {
     const currentSectors = filters.sector || [];
     const newSectors = currentSectors.includes(sector)
@@ -47,7 +55,7 @@ export default function FilterSidebarModern({
   };
 
   const activeFilterCount = [
-    filters.thesis,
+    filters.thesis?.length,
     filters.sector?.length,
     filters.entities?.length,
   ].filter(Boolean).length;
@@ -81,7 +89,14 @@ export default function FilterSidebarModern({
             onClick={() => toggleSection("thesis")}
             className="w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors"
           >
-            <span className="font-medium text-gray-900">Thesis</span>
+            <span className="font-medium text-gray-900">
+              Thesis
+              {filters.thesis && filters.thesis.length > 0 && (
+                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                  {filters.thesis.length}
+                </span>
+              )}
+            </span>
             {expandedSections.thesis ? (
               <ChevronUpIcon className="w-5 h-5 text-gray-400" />
             ) : (
@@ -89,21 +104,21 @@ export default function FilterSidebarModern({
             )}
           </button>
           {expandedSections.thesis && (
-            <div className="p-3 pt-0 border-t border-gray-100">
-              <select
-                value={filters.thesis || ""}
-                onChange={(e) =>
-                  onFiltersChange({ ...filters, thesis: e.target.value || null })
-                }
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-              >
-                <option value="">All theses</option>
-                {filterOptions?.thesis.map((t) => (
-                  <option key={t} value={t}>
-                    {t.replace(/_/g, " ")}
-                  </option>
-                ))}
-              </select>
+            <div className="p-3 pt-0 border-t border-gray-100 space-y-2 max-h-64 overflow-y-auto">
+              {filterOptions?.thesis.map((thesis) => (
+                <label
+                  key={thesis}
+                  className="flex items-center text-sm hover:bg-gray-50 p-1 rounded cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.thesis?.includes(thesis) || false}
+                    onChange={() => handleThesisChange(thesis)}
+                    className="mr-2 rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-gray-700">{thesis.replace(/_/g, " ")}</span>
+                </label>
+              ))}
             </div>
           )}
         </div>
