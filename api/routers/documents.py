@@ -29,34 +29,37 @@ async def get_pending_documents():
 
     Returns documents with status='pending_review' for tag approval workflow.
     """
-    conn = get_db_connection()
-    cur = conn.cursor()
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-    cur.execute("""
-        SELECT id, title, source_type, thesis, topic, sector, entities, summary, content, ingested_date
-        FROM imprint_documents
-        WHERE status = 'pending_review'
-        ORDER BY ingested_date DESC
-    """)
+        cur.execute("""
+            SELECT id, title, source_type, thesis, topic, sector, entities, summary, content, ingested_date
+            FROM imprint_documents
+            WHERE status = 'pending_review'
+            ORDER BY ingested_date DESC
+        """)
 
-    columns = ['id', 'title', 'source_type', 'thesis', 'topic', 'sector', 'entities', 'summary', 'content', 'ingested_date']
-    rows = cur.fetchall()
+        columns = ['id', 'title', 'source_type', 'thesis', 'topic', 'sector', 'entities', 'summary', 'content', 'ingested_date']
+        rows = cur.fetchall()
 
-    documents = []
-    for row in rows:
-        doc = dict(zip(columns, row))
-        # Convert UUID to string
-        doc['id'] = str(doc['id'])
-        # Convert datetime to ISO string
-        doc['ingested_date'] = doc['ingested_date'].isoformat() if doc['ingested_date'] else None
-        # Ensure entities is a list
-        doc['entities'] = doc['entities'] or []
-        documents.append(doc)
+        documents = []
+        for row in rows:
+            doc = dict(zip(columns, row))
+            # Convert UUID to string
+            doc['id'] = str(doc['id'])
+            # Convert datetime to ISO string
+            doc['ingested_date'] = doc['ingested_date'].isoformat() if doc['ingested_date'] else None
+            # Ensure entities is a list
+            doc['entities'] = doc['entities'] or []
+            documents.append(doc)
 
-    cur.close()
-    conn.close()
+        cur.close()
+        conn.close()
 
-    return {"documents": documents}
+        return {"documents": documents}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
 @router.post("/{document_id}/approve")

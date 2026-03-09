@@ -1,4 +1,14 @@
--- Update match_imprint_documents to support multi-select filtering
+-- First drop the old function to avoid overload conflicts
+DROP FUNCTION IF EXISTS match_imprint_documents(
+    query_embedding VECTOR(1536),
+    match_count INT,
+    filter_thesis TEXT,
+    filter_sector TEXT,
+    filter_entities TEXT[],
+    filter_status TEXT
+);
+
+-- Create the new multi-select function
 CREATE OR REPLACE FUNCTION match_imprint_documents(
     query_embedding VECTOR(1536),
     match_count INT DEFAULT 5,
