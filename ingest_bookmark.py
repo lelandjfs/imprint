@@ -96,7 +96,7 @@ def fetch_with_jina(url):
 
 
 def fetch_with_parallel(url):
-    """Fetch content using Parallel Search API - better at bypassing bot detection."""
+    """Fetch content using Parallel Extract API - better at bypassing bot detection."""
     api_key = os.environ.get('PARALLEL_API_KEY')
     if not api_key:
         print(f"    Parallel API key not configured")
@@ -104,37 +104,38 @@ def fetch_with_parallel(url):
 
     try:
         response = requests.post(
-            'https://api.parallel.ai/v1/web/fetch',
+            'https://api.parallel.ai/v1beta/extract',
             headers={
-                'Authorization': f'Bearer {api_key}',
-                'Content-Type': 'application/json'
+                'x-api-key': api_key,
+                'Content-Type': 'application/json',
+                'parallel-beta': 'search-extract-2025-10-10'
             },
             json={
                 'urls': [url],
-                'objective': 'Extract the full article content including title, author, and main text'
+                'objective': 'Extract the full article content including title, author, and main text',
+                'excerpts': True,
+                'full_content': False
             },
             timeout=60
         )
 
         if response.status_code == 200:
             data = response.json()
-            # Handle various response formats
-            if isinstance(data, dict):
-                # Check for results array
-                if 'results' in data and len(data['results']) > 0:
-                    result = data['results'][0]
-                    content = result.get('content') or result.get('text') or result.get('extracted_content')
-                    if content and len(content) > 100:
+            # Handle response format - results array with excerpts
+            if isinstance(data, dict) and 'results' in data and len(data['results']) > 0:
+                result = data['results'][0]
+                # Combine excerpts into full content
+                if 'excerpts' in result and result['excerpts']:
+                    content = '\n\n'.join([exc for exc in result['excerpts'] if exc])
+                    if len(content) > 100:
                         return content
-                # Check for direct content
-                elif 'content' in data:
-                    return data['content']
-                elif 'text' in data:
-                    return data['text']
-            elif isinstance(data, str) and len(data) > 100:
-                return data
+                # Fallback to full_content if available
+                if 'full_content' in result and result['full_content']:
+                    return result['full_content']
 
         print(f"    Parallel returned status {response.status_code}")
+        if response.status_code != 200:
+            print(f"    Response: {response.text[:200]}")
     except Exception as e:
         print(f"    Parallel fetch failed: {e}")
 
