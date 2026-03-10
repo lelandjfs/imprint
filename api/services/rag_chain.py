@@ -60,7 +60,7 @@ rag_prompt = ChatPromptTemplate.from_messages(
 async def stream_rag_response(
     question: str,
     chat_history: List[BaseMessage],
-    model: str = "claude-3-5-sonnet-20241022",
+    model: str = "claude-3-5-sonnet-20250107",
     filter_sector: Optional[List[str]] = None,
     filter_entities: Optional[List[str]] = None,
     filter_sentiment: Optional[List[str]] = None,

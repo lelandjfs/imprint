@@ -265,128 +265,130 @@ export default function TagApproval() {
                 )}
               </div>
 
-              {/* Editable Fields */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6 space-y-4">
-                {/* Topic */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Topic <span className="text-gray-400 text-xs">(snake_case)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={editedDoc.topic || ""}
-                    onChange={(e) => handleFieldChange("topic", e.target.value)}
-                    placeholder="e.g. ai_infrastructure"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+              {/* Editable Fields - Compact 2-column grid */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Topic */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Topic <span className="text-gray-400 text-xs">(snake_case)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={editedDoc.topic || ""}
+                      onChange={(e) => handleFieldChange("topic", e.target.value)}
+                      placeholder="e.g. ai_infrastructure"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    />
+                  </div>
 
-                {/* Sector */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sector
-                  </label>
-                  <select
-                    value={editedDoc.sector || ""}
-                    onChange={(e) => handleFieldChange("sector", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select sector...</option>
-                    {SECTOR_OPTIONS.map((sector) => (
-                      <option key={sector} value={sector}>
-                        {sector}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Sentiment */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sentiment
-                  </label>
-                  <select
-                    value={editedDoc.sentiment || ""}
-                    onChange={(e) => handleFieldChange("sentiment", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select sentiment...</option>
-                    {SENTIMENT_OPTIONS.map((sentiment) => (
-                      <option key={sentiment} value={sentiment}>
-                        {sentiment}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Document Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Document Type
-                  </label>
-                  <select
-                    value={editedDoc.document_type || ""}
-                    onChange={(e) => handleFieldChange("document_type", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select document type...</option>
-                    {DOCUMENT_TYPE_OPTIONS.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Catalyst Window */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Catalyst Window <span className="text-gray-400 text-xs">(optional)</span>
-                  </label>
-                  <select
-                    value={editedDoc.catalyst_window || ""}
-                    onChange={(e) => handleFieldChange("catalyst_window", e.target.value || null)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">None</option>
-                    {CATALYST_WINDOW_OPTIONS.map((window) => (
-                      <option key={window} value={window}>
-                        {window}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Weighting */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Weighting <span className="text-gray-400 text-xs">(optional)</span>
-                  </label>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((weight) => (
-                      <button
-                        key={weight}
-                        onClick={() => handleFieldChange("weighting", weight)}
-                        className={`w-10 h-10 rounded-md font-medium transition-colors ${
-                          editedDoc.weighting === weight
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                        }`}
-                      >
-                        {weight}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => handleFieldChange("weighting", null)}
-                      className="px-3 h-10 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm"
+                  {/* Sector */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Sector
+                    </label>
+                    <select
+                      value={editedDoc.sector || ""}
+                      onChange={(e) => handleFieldChange("sector", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     >
-                      Clear
-                    </button>
+                      <option value="">Select sector...</option>
+                      {SECTOR_OPTIONS.map((sector) => (
+                        <option key={sector} value={sector}>
+                          {sector}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Sentiment */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Sentiment
+                    </label>
+                    <select
+                      value={editedDoc.sentiment || ""}
+                      onChange={(e) => handleFieldChange("sentiment", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    >
+                      <option value="">Select sentiment...</option>
+                      {SENTIMENT_OPTIONS.map((sentiment) => (
+                        <option key={sentiment} value={sentiment}>
+                          {sentiment}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Document Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Document Type
+                    </label>
+                    <select
+                      value={editedDoc.document_type || ""}
+                      onChange={(e) => handleFieldChange("document_type", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    >
+                      <option value="">Select document type...</option>
+                      {DOCUMENT_TYPE_OPTIONS.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Catalyst Window */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Catalyst Window <span className="text-gray-400 text-xs">(optional)</span>
+                    </label>
+                    <select
+                      value={editedDoc.catalyst_window || ""}
+                      onChange={(e) => handleFieldChange("catalyst_window", e.target.value || null)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    >
+                      <option value="">None</option>
+                      {CATALYST_WINDOW_OPTIONS.map((window) => (
+                        <option key={window} value={window}>
+                          {window}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Weighting - spans 2 columns */}
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Weighting <span className="text-gray-400 text-xs">(optional)</span>
+                    </label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((weight) => (
+                        <button
+                          key={weight}
+                          onClick={() => handleFieldChange("weighting", weight)}
+                          className={`w-10 h-10 rounded-md font-medium transition-colors text-sm ${
+                            editedDoc.weighting === weight
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                          }`}
+                        >
+                          {weight}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => handleFieldChange("weighting", null)}
+                        className="px-3 h-10 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm"
+                      >
+                        Clear
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Entities */}
-                <div>
+                {/* Entities - Full width outside grid */}
+                <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Entities
                   </label>
