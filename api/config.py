@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     # LLM APIs
     openai_api_key: str
     anthropic_api_key: str
+    parallel_api_key: str | None = None
 
     # LangSmith
     langsmith_api_key: str | None = None
