@@ -426,8 +426,8 @@ export default function TagApproval() {
                   </div>
                 </div>
 
-                {/* Summary */}
-                <div>
+                {/* Summary - Full width outside grid */}
+                <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Summary <span className="text-gray-400 text-xs">(one sentence)</span>
                   </label>
@@ -436,7 +436,7 @@ export default function TagApproval() {
                     onChange={(e) => handleFieldChange("summary", e.target.value)}
                     rows={3}
                     placeholder="One sentence takeaway..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   />
                 </div>
               </div>
