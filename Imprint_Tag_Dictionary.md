@@ -1,243 +1,339 @@
-# Imprint – Tag Dictionary (V1)
+# Imprint – Tag Schema (V1)
 
-This document defines the tagging conventions for Imprint so retrieval stays consistent as the library scales.
+This document defines the core tagging structure for documents ingested into **Imprint**.
 
----
+Tags are designed to remain **simple, consistent, and market-linkable**.
 
-## Core Principles
-
-- **Tag once, reuse everywhere.** Prefer a smaller, stable set of tags over many bespoke ones.
-- **Entities are the join key.** Use consistent entity naming so V2 (prices/markets) can map cleanly.
-- **Thesis ≠ Topic.** Thesis is the *lens*. Topic is the *subject*.
-- **LLM proposes; you approve.** Treat suggested tags as drafts.
+The goal is not to perfectly structure every idea, but to provide enough metadata to connect research to **entities, sectors, and markets**.
 
 ---
 
-## Required Fields
+## Core Tags
 
-### 1) `thesis`
-**Definition:** Your investment lens / structural belief the document supports or challenges.
+### 1. `topic`
 
-**Format:** `snake_case` (lowercase, no punctuation).  
-**Cardinality:** Prefer **one primary thesis** per doc (you can add a secondary in notes if needed).
+**Definition**
 
-**Recommended starter set (edit freely):**
-- `ai_cost_compression`
-- `capital_cycle`
-- `platform_consolidation`
-- `workflow_automation`
-- `regulatory_tailwind`
-- `distribution_shifts`
-- `pricing_power`
-- `security_as_default`
-- `data_gravity`
-- `verticalization`
+The primary subject or mechanism the document discusses.
 
-**Examples:**
-- A GPU supply chain note supporting overbuild cycles → `capital_cycle`
-- A piece on AI reducing software labor cost → `ai_cost_compression`
+A topic describes **what the article is about**, not the investment opinion.
 
----
+Topics should be **specific but reusable** across many documents.
 
-### 2) `topic`
-**Definition:** What the piece is concretely about (narrower than thesis).
+**Format**
 
-**Format:** `snake_case` (lowercase).  
-**Cardinality:** One primary topic; add additional topics only if truly necessary.
+```
+snake_case
+```
 
-**Topic conventions (recommended):**
-- Prefer *mechanism- or domain-specific* topics:
-  - `ai_inference_economics` (good)
-  - `gpu_supply_constraints` (good)
-  - `hyperscaler_capex` (good)
-  - `vertical_saas_pricing` (good)
-- Avoid vague topics:
-  - `ai` (too broad)
-  - `software` (too broad)
+**Examples**
 
-**Example topics (seed list):**
-- `ai_inference_economics`
-- `ai_agents_enterprise`
-- `hyperscaler_capex`
-- `gpu_supply_constraints`
-- `semiconductor_supply_chain`
-- `enterprise_procurement`
-- `security_platforms`
-- `devtools_adoption`
-- `fintech_risk_models`
-- `payments_networks`
-- `healthcare_admin_workflows`
-- `energy_grid_modernization`
-- `industrial_automation`
+```
+ai_infrastructure
+hyperscaler_capex
+china_export_controls
+trade_policy
+consumer_credit
+enterprise_ai_adoption
+semiconductor_supply_chain
+defense_spending
+interest_rates
+energy_grid_modernization
+```
+
+**Good topic rule**
+
+Prefer **mechanism or domain-level descriptions** rather than broad labels.
+
+Good:
+```
+gpu_supply_constraints
+ai_inference_economics
+```
+
+Bad:
+```
+ai
+technology
+markets
+```
 
 ---
 
-### 3) `sector`
-**Definition:** Broad bucket for quick filtering.
+### 2. `entities`
 
-**Format:** Title Case (stable names).  
-**Allowed values (keep tight):**
-- `Infra`
-- `Security`
-- `Fintech`
-- `Healthcare`
-- `Consumer`
-- `Energy`
-- `Industrial`
-- `Macro`
+**Definition**
 
-**Rule:** If you’re unsure, pick the closest primary sector and note the nuance in `notes`.
+Companies, organizations, people, or products referenced in the document.
 
----
+Entities create the main bridge between research and **markets**.
 
-### 4) `entities`
-**Definition:** Companies / tickers / people / products referenced.
+They are the most important tag for linking to:
+- public equities
+- private companies
+- government actors
+- prediction markets
 
-**Format:** Array of strings.  
-**Cardinality:** 0+ (but aim to include at least the key one).
+**Format**
 
-#### Entity formatting rules
-- **Public companies:** use **ticker** when clear (`NVDA`, `MSFT`, `AMZN`).  
-- **Private companies:** use canonical brand name (`OpenAI`, `Anthropic`, `Databricks`).  
-- **People:** `First Last` (`Sam Altman`).  
-- **Products:** `Company:Product` (`Meta:Ray-Ban`, `OpenAI:ChatGPT`).
+Array of values.
 
-#### Canonicalization guidance
-- Avoid duplicates: don’t include both `Nvidia` and `NVDA`. Pick one (prefer ticker for public).
-- No `$` prefix in canonical entities (use `NVDA`, not `$NVDA`).
+```json
+["NVDA", "OpenAI", "Jerome Powell"]
+```
 
----
+**Entity formatting rules**
 
-## Dates
+Public companies → ticker preferred
+```
+NVDA
+AMZN
+MSFT
+TSLA
+```
 
-### `published_date` (optional)
-- Use when known (especially for older pieces).
-- If unknown, leave blank.
+Private companies → canonical company name
+```
+OpenAI
+Anthropic
+Databricks
+Anduril
+```
 
-### `ingested_date` (auto)
-- Set by the system at ingestion time.
-- Not manually edited.
+People → full name
+```
+Sam Altman
+Jerome Powell
+Donald Trump
+```
 
----
-
-## Optional Fields (High Leverage)
-
-### `document_type` (optional but recommended)
-**Definition:** What the artifact is structurally.
-
-**Allowed values:**
-- `newsletter`
-- `article`
-- `whitepaper`
-- `research_report`
-- `earnings_call`
-- `tweet_thread`
-- `internal_note`
+Organizations / institutions
+```
+Department of Defense
+Federal Reserve
+European Commission
+```
 
 ---
 
-### `angle` (optional)
-**Definition:** What kind of analysis/thinking it represents.
+### 3. `sector`
 
-**Allowed values:**
-- `deep_dive`
-- `market_map`
-- `technical`
-- `earnings_notes`
-- `opinion`
-- `case_study`
-- `macro_view`
+**Definition**
 
----
+High-level classification describing the economic or industry area affected.
 
-### `conviction` (optional)
-**Definition:** Your confidence that the content is decision-relevant.
+Sectors provide **broad filtering** across the research library.
 
-**Scale:** 1–5  
-- 1 = weak / speculative
-- 3 = solid / plausible
-- 5 = high conviction / repeatedly validated
+Keep the list **tight and stable**.
 
----
+**Recommended values** (examples, not exhaustive)
 
-### `catalyst_window` (optional)
-**Definition:** When you expect the idea to matter.
+```
+Infra
+Software
+Semiconductors
+Security
+Fintech
+Healthcare
+Energy
+Industrial
+Consumer
+Macro
+Government
+Geopolitics
+```
 
-**Allowed values:**
-- `0-3m`
-- `3-12m`
-- `12m+`
-- `structural`
+**Examples**
 
-**Rule of thumb:**
-- If it’s an event → `0-3m`
-- If it’s an adoption curve → `3-12m` or `12m+`
-- If it’s a regime shift → `structural`
+```
+sector: Semiconductors
+sector: Government
+sector: Infra
+sector: Fintech
+```
 
 ---
 
-### `source_quality` (optional, recommended)
-**Definition:** How trustworthy / rigorous the source is (not your conviction in the thesis).
+### 4. `sentiment`
 
-**Scale:** 1–5
+**Definition**
 
----
+The overall directional tone of the document toward the topic or key entities.
 
-### `status` (optional, recommended)
-**Definition:** Lifecycle of the idea in your system.
+Sentiment is **not truth** – it reflects the author's perspective.
 
-**Allowed values:**
-- `active`
-- `watching`
-- `invalidated`
-- `archived`
+Contradictory documents are expected and useful.
 
----
+**Allowed values**
 
-### `summary` (optional, strongly recommended)
-**Definition:** One-sentence takeaway (forced clarity).
+```
+bullish
+bearish
+neutral
+mixed
+```
 
-**Guideline:** If you can’t write it, you probably don’t understand the point yet.
+**Examples**
 
----
+Article arguing hyperscaler spending will increase demand for GPUs:
+```
+sentiment: bullish
+```
 
-### `notes` (optional)
-Free text: why you saved it, what you believe, what you disagree with, follow-ups.
+Article warning that Amazon is overspending on AI infrastructure:
+```
+sentiment: bearish
+entities: ["AMZN"]
+```
 
----
-
-## Suggested Review Flow (Post-Ingestion)
-
-1. Ingest extracts text + metadata.
-2. LLM proposes: thesis/topic/sector/entities + optional fields.
-3. You:
-   - **Approve**
-   - **Edit**
-   - **Add missing entities**
-   - Add `summary` + `conviction` when useful
+Article presenting both positive and negative arguments:
+```
+sentiment: mixed
+```
 
 ---
 
-## Examples
+### 5. `summary`
 
-### Example A: AI infra capex note
-- thesis: `capital_cycle`
-- topic: `hyperscaler_capex`
-- sector: `Infra`
-- entities: [`MSFT`, `AMZN`, `GOOGL`, `NVDA`]
-- angle: `deep_dive`
-- catalyst_window: `3-12m`
-- conviction: 4
-- summary: “Hyperscaler capex is accelerating, but second-order supply constraints may flip margins across the stack.”
+**Definition**
 
-### Example B: Security consolidation
-- thesis: `platform_consolidation`
-- topic: `security_platforms`
-- sector: `Security`
-- entities: [`CRWD`, `PANW`, `SentinelOne`]
-- angle: `market_map`
-- catalyst_window: `12m+`
-- conviction: 3
-- summary: “Security buyers are consolidating vendors; platform suites are winning budget share.”
+A short one-sentence explanation of the document's key takeaway.
+
+This should capture **the core idea or signal** in the article.
+
+The summary is written **after ingestion** and helps with:
+- quick scanning
+- search results
+- digest generation
+- pattern detection across documents
+
+**Guidelines**
+
+- One sentence
+- Clear and direct
+- Focus on the mechanism or implication
+
+**Examples**
+
+```
+"Hyperscaler AI spending is accelerating faster than expected, creating near-term demand for Nvidia GPUs."
+
+"Export controls on advanced chips could restrict Nvidia and AMD sales to China."
+
+"Defense AI contracts are shifting toward private startups rather than traditional contractors."
+
+"Enterprise AI adoption is being slowed by data governance and infrastructure constraints."
+```
 
 ---
+
+### 6. `document_type`
+
+**Definition**
+
+The format or style of the document.
+
+This helps filter by content type when researching or building digests.
+
+**Allowed values**
+
+```
+memo
+article
+research_report
+transcript
+presentation
+other
+```
+
+**Examples**
+
+```
+document_type: memo
+document_type: article
+document_type: research_report
+document_type: transcript
+```
+
+**Guidelines**
+
+- `memo` - Internal research memos, investment theses, strategy notes
+- `article` - News articles, blog posts, newsletters
+- `research_report` - Formal research reports from banks, analysts, firms
+- `transcript` - Earnings calls, interviews, conference presentations
+- `presentation` - Slide decks, investor presentations
+- `other` - Everything else
+
+---
+
+### 7. `catalyst_window` (optional)
+
+**Definition**
+
+The expected time horizon for the idea or signal to materialize.
+
+This is **optional** and only applies when the document implies a specific timing.
+
+**Allowed values**
+
+```
+immediate
+near_term
+medium_term
+long_term
+structural
+```
+
+**Examples**
+
+Article about upcoming earnings report:
+```
+catalyst_window: immediate
+```
+
+Article about AI regulation expected in 12-18 months:
+```
+catalyst_window: medium_term
+```
+
+Article about long-term shift in supply chains:
+```
+catalyst_window: structural
+```
+
+**Guidelines**
+
+- `immediate` - Days to weeks (earnings, announcements, events)
+- `near_term` - 1-6 months (upcoming policy changes, product launches)
+- `medium_term` - 6-18 months (regulatory cycles, infrastructure buildouts)
+- `long_term` - 18 months+ (demographic shifts, technology adoption)
+- `structural` - No specific timeline, ongoing trend (deglobalization, AI transformation)
+
+Leave blank if the document doesn't imply a specific timing.
+
+---
+
+## Example Document
+
+Example document entry in Imprint:
+
+```yaml
+topic: ai_infrastructure
+sector: Semiconductors
+
+entities:
+- NVDA
+- AMZN
+- MSFT
+
+sentiment: bullish
+
+document_type: article
+
+catalyst_window: near_term
+
+summary:
+"Hyperscaler capital spending on AI data centers is accelerating, driving continued demand for Nvidia GPUs."
+
+weighting: 4
+```

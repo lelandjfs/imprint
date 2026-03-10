@@ -15,9 +15,9 @@ class ImprintRetriever(BaseRetriever):
     supabase_client: Client
     embeddings: OpenAIEmbeddings
     k: int = 5
-    filter_thesis: Optional[List[str]] = None  # Changed to List for multi-select
-    filter_sector: Optional[List[str]] = None  # Changed to List for multi-select
+    filter_sector: Optional[List[str]] = None
     filter_entities: Optional[List[str]] = None
+    filter_sentiment: Optional[List[str]] = None
     filter_status: str = "active"
 
     class Config:
@@ -36,9 +36,9 @@ class ImprintRetriever(BaseRetriever):
             {
                 "query_embedding": query_embedding,
                 "match_count": self.k,
-                "filter_thesis": self.filter_thesis,
                 "filter_sector": self.filter_sector,
                 "filter_entities": self.filter_entities,
+                "filter_sentiment": self.filter_sentiment,
                 "filter_status": self.filter_status,
             },
         ).execute()
@@ -50,9 +50,9 @@ class ImprintRetriever(BaseRetriever):
                 "id": row["id"],
                 "title": row["title"],
                 "summary": row["summary"],
-                "thesis": row["thesis"],
                 "topic": row["topic"],
                 "sector": row["sector"],
+                "sentiment": row["sentiment"],
                 "entities": row["entities"],
                 "source_url": row["source_url"],
                 "similarity": row["similarity"],
@@ -69,9 +69,9 @@ class ImprintRetriever(BaseRetriever):
 
 def create_retriever(
     k: int = 5,
-    filter_thesis: Optional[str] = None,
-    filter_sector: Optional[str] = None,
+    filter_sector: Optional[List[str]] = None,
     filter_entities: Optional[List[str]] = None,
+    filter_sentiment: Optional[List[str]] = None,
 ) -> ImprintRetriever:
     """Create a configured Imprint retriever."""
     settings = get_settings()
@@ -90,7 +90,7 @@ def create_retriever(
         supabase_client=supabase_client,
         embeddings=embeddings,
         k=k,
-        filter_thesis=filter_thesis,
         filter_sector=filter_sector,
         filter_entities=filter_entities,
+        filter_sentiment=filter_sentiment,
     )

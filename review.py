@@ -22,25 +22,22 @@ def get_documents(status_filter=None):
 
     if status_filter:
         cur.execute("""
-            SELECT id, title, author, source_type, source_url, thesis, topic, sector,
-                   entities, document_type, angle, catalyst_window, summary, status,
-                   content
+            SELECT id, title, author, source_type, source_url, topic, sector,
+                   entities, sentiment, summary, weighting, status, content
             FROM imprint_documents
             WHERE status = %s
             ORDER BY ingested_date DESC
         """, (status_filter,))
     else:
         cur.execute("""
-            SELECT id, title, author, source_type, source_url, thesis, topic, sector,
-                   entities, document_type, angle, catalyst_window, summary, status,
-                   content
+            SELECT id, title, author, source_type, source_url, topic, sector,
+                   entities, sentiment, summary, weighting, status, content
             FROM imprint_documents
             ORDER BY ingested_date DESC
         """)
 
-    columns = ['id', 'title', 'author', 'source_type', 'source_url', 'thesis',
-               'topic', 'sector', 'entities', 'document_type', 'angle',
-               'catalyst_window', 'summary', 'status', 'content']
+    columns = ['id', 'title', 'author', 'source_type', 'source_url', 'topic',
+               'sector', 'entities', 'sentiment', 'summary', 'weighting', 'status', 'content']
 
     docs = []
     for row in cur.fetchall():
@@ -88,13 +85,11 @@ def print_document(doc, index, total):
     print(f"Source:   {doc['source_url'][:60] if doc['source_url'] else 'N/A'}...")
     print()
     print("--- Proposed Tags ---")
-    print(f"Thesis:         {doc['thesis']}")
     print(f"Topic:          {doc['topic']}")
     print(f"Sector:         {doc['sector']}")
+    print(f"Sentiment:      {doc['sentiment']}")
     print(f"Entities:       {doc['entities']}")
-    print(f"Document Type:  {doc['document_type']}")
-    print(f"Angle:          {doc['angle']}")
-    print(f"Catalyst:       {doc['catalyst_window']}")
+    print(f"Weighting:      {doc['weighting'] or 'None'}")
     print()
     print(f"Summary: {doc['summary']}")
     print()
@@ -140,13 +135,11 @@ def review_document(doc, index, total):
 
             # Editable fields
             fields = [
-                ('thesis', doc['thesis']),
                 ('topic', doc['topic']),
                 ('sector', doc['sector']),
+                ('sentiment', doc['sentiment']),
                 ('entities', doc['entities']),
-                ('document_type', doc['document_type']),
-                ('angle', doc['angle']),
-                ('catalyst_window', doc['catalyst_window']),
+                ('weighting', doc['weighting']),
                 ('summary', doc['summary'])
             ]
 

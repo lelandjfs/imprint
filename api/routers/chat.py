@@ -48,9 +48,9 @@ async def chat(request: ChatRequest):
 
         # Extract filters
         filters = request.filters or {}
-        filter_thesis = filters.get("thesis")
         filter_sector = filters.get("sector")
         filter_entities = filters.get("entities")
+        filter_sentiment = filters.get("sentiment")
 
         # Stream response
         async def event_stream():
@@ -60,9 +60,9 @@ async def chat(request: ChatRequest):
                     question=request.message,
                     chat_history=chat_history,
                     model=request.model,
-                    filter_thesis=filter_thesis,
                     filter_sector=filter_sector,
                     filter_entities=filter_entities,
+                    filter_sentiment=filter_sentiment,
                 ):
                     # Format as SSE
                     yield f"data: {json.dumps(chunk)}\n\n"

@@ -43,7 +43,7 @@ VISION_FOLDER_ID = '1rysQYeZSqReScWxVq0T8cpfHHWNNi9LK'
 def get_vision_files():
     """Fetch all files from the Vision folder."""
     results = drive.files().list(
-        q=f"'{VISION_FOLDER_ID}' in parents",
+        q=f"'{VISION_FOLDER_ID}' in parents and trashed=false",
         fields="files(id, name, mimeType, size)"
     ).execute()
     return results.get('files', [])
@@ -127,20 +127,19 @@ def propose_tags(document):
     """Use Claude to propose tags for a document."""
     content_preview = document['content'][:10000]
 
-    prompt = f"""You are a research librarian helping categorize investment research documents.
+    prompt = f"""You are a research librarian helping categorize investment research documents for market-linkable research.
 
 Given the document below (extracted from a visual/chart-heavy PDF), propose tags following the Imprint taxonomy. Return a JSON object with these fields:
 
-- thesis: One primary thesis from: ai_cost_compression, capital_cycle, platform_consolidation, workflow_automation, regulatory_tailwind, distribution_shifts, pricing_power, security_as_default, data_gravity, verticalization (or propose a new one in snake_case if none fit)
-- topic: One specific topic - be specific, not vague
-- sector: One of: Infra, Security, Fintech, Healthcare, Consumer, Energy, Industrial, Macro
-- entities: Array of companies/people mentioned. Use tickers for public companies, canonical names for private.
-- document_type: One of: newsletter, article, whitepaper, research_report, earnings_call, tweet_thread, internal_note
-- angle: One of: deep_dive, market_map, technical, earnings_notes, opinion, case_study, macro_view
-- catalyst_window: One of: 0-3m, 3-12m, 12m+, structural
-- summary: One sentence takeaway (what's the key insight?)
+- topic: One specific topic (e.g., ai_inference_economics, gpu_supply_constraints) - be specific and mechanism-focused, not vague
+- sector: One sector (e.g., Infra, Software, Semiconductors, Security, Fintech, Healthcare, Energy, Industrial, Consumer, Macro, Government, Geopolitics)
+- entities: Array of companies/people/organizations. Use tickers for public companies (NVDA not Nvidia), canonical names for private (OpenAI not openai), full names for people (Jerome Powell)
+- sentiment: One of: bullish, bearish, neutral, mixed (the author's directional tone toward the topic/entities)
+- document_type: One of: memo, article, research_report, transcript, presentation, other
+- catalyst_window: (optional, null if not applicable) One of: immediate, near_term, medium_term, long_term, structural (leave null if document doesn't imply specific timing)
+- summary: One sentence takeaway capturing the core insight or signal
 
-Reference taxonomy:
+Reference taxonomy (examples, not exhaustive):
 {TAG_DICTIONARY[:3000]}
 
 Document title: {document['title']}
@@ -185,10 +184,10 @@ def store_document(document, tags, embedding):
     cur.execute("""
         INSERT INTO imprint_documents (
             title, author, content, source_type, source, source_url,
-            published_date, thesis, topic, sector, entities,
-            document_type, angle, catalyst_window, summary, embedding, status
+            published_date, topic, sector, entities, sentiment, document_type, catalyst_window, summary,
+            embedding, status
         ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
         )
         RETURNING id
     """, (
@@ -199,12 +198,11 @@ def store_document(document, tags, embedding):
         document.get('source'),
         document.get('source_url'),
         document.get('published_date'),
-        tags.get('thesis'),
         tags.get('topic'),
         tags.get('sector'),
         tags.get('entities', []),
+        tags.get('sentiment'),
         tags.get('document_type'),
-        tags.get('angle'),
         tags.get('catalyst_window'),
         tags.get('summary'),
         embedding,
@@ -275,9 +273,11 @@ def process_vision_file(file_info):
     # Propose tags
     print(f"  Proposing tags via Claude...")
     tags = propose_tags(document)
-    print(f"  Thesis: {tags.get('thesis')}")
     print(f"  Topic: {tags.get('topic')}")
     print(f"  Sector: {tags.get('sector')}")
+    print(f"  Sentiment: {tags.get('sentiment')}")
+    print(f"  Document Type: {tags.get('document_type')}")
+    print(f"  Catalyst Window: {tags.get('catalyst_window') or 'None'}")
     print(f"  Entities: {tags.get('entities', [])}")
 
     # Generate embedding

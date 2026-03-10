@@ -96,13 +96,13 @@ def get_pending_documents():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT id, title, source_type, thesis, topic, sector, entities, summary
+        SELECT id, title, source_type, topic, sector, entities, sentiment, summary
         FROM imprint_documents
         WHERE status = 'pending_review'
         ORDER BY ingested_date DESC
     """)
 
-    columns = ['id', 'title', 'source_type', 'thesis', 'topic', 'sector', 'entities', 'summary']
+    columns = ['id', 'title', 'source_type', 'topic', 'sector', 'entities', 'sentiment', 'summary']
     docs = [dict(zip(columns, row)) for row in cur.fetchall()]
 
     cur.close()
@@ -193,7 +193,7 @@ def send_ingestion_summary_email(to_email="leland.speth@gmail.com"):
         for i, doc in enumerate(pending_docs, 1):
             body_parts.append(f"\n[{i}] {doc['title'][:55]}")
             body_parts.append(f"    Type: {doc['source_type']}")
-            body_parts.append(f"    Thesis: {doc['thesis']} | Topic: {doc['topic']} | Sector: {doc['sector']}")
+            body_parts.append(f"    Topic: {doc['topic']} | Sector: {doc['sector']} | Sentiment: {doc['sentiment']}")
             body_parts.append(f"    Entities: {', '.join(doc['entities'] or [])}")
             body_parts.append(f"    Summary: {doc['summary'][:100]}..." if doc['summary'] else "")
 

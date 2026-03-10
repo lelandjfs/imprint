@@ -18,21 +18,13 @@ export default function FilterSidebarModern({
   onClear,
 }: FilterSidebarProps) {
   const [expandedSections, setExpandedSections] = useState({
-    thesis: true,
     sector: true,
+    sentiment: true,
     entities: false,
   });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
-
-  const handleThesisChange = (thesis: string) => {
-    const currentTheses = filters.thesis || [];
-    const newTheses = currentTheses.includes(thesis)
-      ? currentTheses.filter((t) => t !== thesis)
-      : [...currentTheses, thesis];
-    onFiltersChange({ ...filters, thesis: newTheses.length > 0 ? newTheses : null });
   };
 
   const handleSectorChange = (sector: string) => {
@@ -41,6 +33,17 @@ export default function FilterSidebarModern({
       ? currentSectors.filter((s) => s !== sector)
       : [...currentSectors, sector];
     onFiltersChange({ ...filters, sector: newSectors.length > 0 ? newSectors : null });
+  };
+
+  const handleSentimentChange = (sentiment: string) => {
+    const currentSentiments = filters.sentiment || [];
+    const newSentiments = currentSentiments.includes(sentiment)
+      ? currentSentiments.filter((s) => s !== sentiment)
+      : [...currentSentiments, sentiment];
+    onFiltersChange({
+      ...filters,
+      sentiment: newSentiments.length > 0 ? newSentiments : null,
+    });
   };
 
   const handleEntityChange = (entity: string) => {
@@ -55,8 +58,8 @@ export default function FilterSidebarModern({
   };
 
   const activeFilterCount = [
-    filters.thesis?.length,
     filters.sector?.length,
+    filters.sentiment?.length,
     filters.entities?.length,
   ].filter(Boolean).length;
 
@@ -83,46 +86,6 @@ export default function FilterSidebarModern({
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Thesis */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <button
-            onClick={() => toggleSection("thesis")}
-            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors"
-          >
-            <span className="font-medium text-gray-900">
-              Thesis
-              {filters.thesis && filters.thesis.length > 0 && (
-                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
-                  {filters.thesis.length}
-                </span>
-              )}
-            </span>
-            {expandedSections.thesis ? (
-              <ChevronUpIcon className="w-5 h-5 text-gray-400" />
-            ) : (
-              <ChevronDownIcon className="w-5 h-5 text-gray-400" />
-            )}
-          </button>
-          {expandedSections.thesis && (
-            <div className="p-3 pt-0 border-t border-gray-100 space-y-2 max-h-64 overflow-y-auto">
-              {filterOptions?.thesis.map((thesis) => (
-                <label
-                  key={thesis}
-                  className="flex items-center text-sm hover:bg-gray-50 p-1 rounded cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.thesis?.includes(thesis) || false}
-                    onChange={() => handleThesisChange(thesis)}
-                    className="mr-2 rounded text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-gray-700">{thesis.replace(/_/g, " ")}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Sector */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <button
@@ -157,6 +120,46 @@ export default function FilterSidebarModern({
                     className="mr-2 rounded text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">{sector}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Sentiment */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <button
+            onClick={() => toggleSection("sentiment")}
+            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors"
+          >
+            <span className="font-medium text-gray-900">
+              Sentiment
+              {filters.sentiment && filters.sentiment.length > 0 && (
+                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                  {filters.sentiment.length}
+                </span>
+              )}
+            </span>
+            {expandedSections.sentiment ? (
+              <ChevronUpIcon className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronDownIcon className="w-5 h-5 text-gray-400" />
+            )}
+          </button>
+          {expandedSections.sentiment && (
+            <div className="p-3 pt-0 border-t border-gray-100 space-y-2">
+              {filterOptions?.sentiment.map((sentiment) => (
+                <label
+                  key={sentiment}
+                  className="flex items-center text-sm hover:bg-gray-50 p-1 rounded cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.sentiment?.includes(sentiment) || false}
+                    onChange={() => handleSentimentChange(sentiment)}
+                    className="mr-2 rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-gray-700 capitalize">{sentiment}</span>
                 </label>
               ))}
             </div>

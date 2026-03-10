@@ -13,18 +13,21 @@ export interface Document {
   id: number;
   title: string;
   summary: string | null;
-  thesis: string | null;
   topic: string | null;
   sector: string | null;
   entities: string[] | null;
+  sentiment: string | null;
+  document_type: string | null;
+  catalyst_window: string | null;
+  weighting: number | null;
   source_url: string | null;
   similarity: number;
 }
 
 export interface ChatFilters {
-  thesis?: string[] | null;
   sector?: string[] | null;
   entities?: string[] | null;
+  sentiment?: string[] | null;
   date_range?: {
     start?: string | null;
     end?: string | null;
@@ -32,11 +35,10 @@ export interface ChatFilters {
 }
 
 export interface FilterOptions {
-  thesis: string[];
   sector: string[];
   entities: string[];
+  sentiment: string[];
   document_type: string[];
-  angle: string[];
   catalyst_window: string[];
 }
 

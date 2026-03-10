@@ -61,18 +61,18 @@ async def stream_rag_response(
     question: str,
     chat_history: List[BaseMessage],
     model: str = "claude-3-5-sonnet-20241022",
-    filter_thesis: Optional[str] = None,
-    filter_sector: Optional[str] = None,
+    filter_sector: Optional[List[str]] = None,
     filter_entities: Optional[List[str]] = None,
+    filter_sentiment: Optional[List[str]] = None,
 ) -> AsyncIterator[dict]:
     """Stream RAG response with sources."""
 
     # Create retriever with filters
     retriever = create_retriever(
         k=5,
-        filter_thesis=filter_thesis,
         filter_sector=filter_sector,
         filter_entities=filter_entities,
+        filter_sentiment=filter_sentiment,
     )
 
     # Condense question if there's chat history
@@ -94,9 +94,9 @@ async def stream_rag_response(
             "id": doc.metadata["id"],
             "title": doc.metadata["title"],
             "summary": doc.metadata["summary"],
-            "thesis": doc.metadata["thesis"],
             "topic": doc.metadata["topic"],
             "sector": doc.metadata["sector"],
+            "sentiment": doc.metadata["sentiment"],
             "entities": doc.metadata["entities"],
             "source_url": doc.metadata["source_url"],
             "similarity": doc.metadata["similarity"],
@@ -109,7 +109,7 @@ async def stream_rag_response(
     context = "\n\n---\n\n".join(
         [
             f"Document: {doc.metadata['title']}\n"
-            f"Thesis: {doc.metadata['thesis']} | Sector: {doc.metadata['sector']}\n"
+            f"Topic: {doc.metadata['topic']} | Sector: {doc.metadata['sector']} | Sentiment: {doc.metadata['sentiment']}\n"
             f"Summary: {doc.metadata['summary']}\n\n"
             f"{doc.page_content[:2000]}"  # Limit context per doc
             for doc in docs

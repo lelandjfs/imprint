@@ -1,0 +1,361 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2821
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Bold;\f1\froman\fcharset0 Times-Roman;\f2\fmodern\fcharset0 Courier-Bold;
+\f3\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c50196\c50196\c50196;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid201\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid3}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f0\b\fs48 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Imprint \'96 Tag Schema (V1)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 This document defines the core tagging structure for documents ingested into 
+\f0\b Imprint
+\f1\b0 .\uc0\u8232 Tags are designed to remain 
+\f0\b simple, consistent, and market-linkable
+\f1\b0 .\
+The goal is not to perfectly structure every idea, but to provide enough metadata to connect research to 
+\f0\b entities, sectors, and markets
+\f1\b0 .\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f0\b\fs48 \cf0 \strokec2 Core Tags\
+\pard\pardeftab720\sa298\partightenfactor0
+
+\fs36 \cf0 1. 
+\f2\fs39 topic
+\f0\fs36 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Definition
+\f1\b0 \
+The primary subject or mechanism the document discusses.\
+A topic describes 
+\f0\b what the article is about
+\f1\b0 , not the investment opinion.\
+Topics should be 
+\f0\b specific but reusable
+\f1\b0  across many documents.\
+
+\f0\b Format
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+snake_case\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b\fs24 \cf0 Examples
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+ai_infrastructure\
+hyperscaler_capex\
+china_export_controls\
+trade_policy\
+consumer_credit\
+enterprise_ai_adoption\
+semiconductor_supply_chain\
+defense_spending\
+interest_rates\
+energy_grid_modernization\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b\fs24 \cf0 Good topic rule
+\f1\b0 \
+Prefer 
+\f0\b mechanism or domain-level descriptions
+\f1\b0  rather than broad labels.\
+Good:\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+gpu_supply_constraints\
+ai_inference_economics\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Bad:\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+ai\
+technology\
+markets\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 2. 
+\f2\fs39 entities
+\f0\fs36 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Definition
+\f1\b0 \
+Companies, organizations, people, or products referenced in the document.\
+Entities create the main bridge between research and 
+\f0\b markets
+\f1\b0 .\
+They are the most important tag for linking to:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls1\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 public equities\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 private companies\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 government actors\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 prediction markets\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 Format
+\f1\b0 \
+Array of values.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+["NVDA", "OpenAI", "Jerome Powell"]\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b\fs24 \cf0 Entity formatting rules
+\f1\b0 \
+Public companies \uc0\u8594  ticker preferred\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+NVDA\
+AMZN\
+MSFT\
+TSLA\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Private companies \uc0\u8594  canonical company name\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+OpenAI\
+Anthropic\
+Databricks\
+Anduril\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 People \uc0\u8594  full name\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+Sam Altman\
+Jerome Powell\
+Donald Trump\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Organizations / institutions\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+Department of Defense\
+Federal Reserve\
+European Commission\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 3. 
+\f2\fs39 sector
+\f0\fs36 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Definition
+\f1\b0 \
+High-level classification describing the economic or industry area affected.\
+Sectors provide 
+\f0\b broad filtering
+\f1\b0  across the research library.\
+Keep the list 
+\f0\b tight and stable
+\f1\b0 .\
+
+\f0\b Recommended values
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+Infra\
+Software\
+Semiconductors\
+Security\
+Fintech\
+Healthcare\
+Energy\
+Industrial\
+Consumer\
+Macro\
+Government\
+Geopolitics\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b\fs24 \cf0 Examples
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+sector: Semiconductors\
+sector: Government\
+sector: Infra\
+sector: Fintech\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 4. 
+\f2\fs39 sentiment
+\f0\fs36 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Definition
+\f1\b0 \
+The overall directional tone of the document toward the topic or key entities.\
+Sentiment is 
+\f0\b not truth
+\f1\b0  \'97 it reflects the author's perspective.\
+Contradictory documents are expected and useful.\
+
+\f0\b Allowed values
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+bullish\
+bearish\
+neutral\
+mixed\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b\fs24 \cf0 Examples
+\f1\b0 \
+Article arguing hyperscaler spending will increase demand for GPUs:\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+sentiment: bullish\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Article warning that Amazon is overspending on AI infrastructure:\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+sentiment: bearish\
+entities: ["AMZN"]\
+\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Article presenting both positive and negative arguments:\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+sentiment: mixed\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 5. 
+\f2\fs39 summary
+\f0\fs36 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Definition
+\f1\b0 \
+A short one-sentence explanation of the document\'92s key takeaway.\
+This should capture 
+\f0\b the core idea or signal
+\f1\b0  in the article.\
+The summary is written 
+\f0\b after ingestion
+\f1\b0  and helps with:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls2\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 quick scanning\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 search results\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 digest generation\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 pattern detection across documents\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 Guidelines
+\f1\b0 \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls3\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 One sentence\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Clear and direct\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Focus on the mechanism or implication\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 Examples
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+"Hyperscaler AI spending is accelerating faster than expected, creating near-term demand for Nvidia GPUs."\
+\
+"Export controls on advanced chips could restrict Nvidia and AMD sales to China."\
+\
+"Defense AI contracts are shifting toward private startups rather than traditional contractors."\
+\
+"Enterprise AI adoption is being slowed by data governance and infrastructure constraints."\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f0\b\fs48 \cf0 \strokec2 Example Document\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Example document entry in Imprint:\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 \
+topic: ai_infrastructure\
+sector: Semiconductors\
+\
+entities:\
+- NVDA\
+- AMZN\
+- MSFT\
+\
+sentiment: bullish\
+\
+summary:\
+"Hyperscaler capital spending on AI data centers is accelerating, driving continued demand for Nvidia GPUs."\
+\
+}
