@@ -47,9 +47,14 @@ export default function SourcesPanel({
                   {doc.sector}
                 </span>
               )}
-              {doc.thesis && (
+              {doc.sentiment && (
+                <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">
+                  {doc.sentiment}
+                </span>
+              )}
+              {doc.document_type && (
                 <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                  {doc.thesis}
+                  {doc.document_type}
                 </span>
               )}
             </div>
