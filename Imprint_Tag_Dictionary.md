@@ -238,6 +238,7 @@ This helps filter by content type when researching or building digests.
 **Allowed values**
 
 ```
+article
 blog
 whitepaper
 transcript
@@ -251,15 +252,16 @@ other
 **Examples**
 
 ```
+document_type: article
 document_type: blog
-document_type: whitepaper
 document_type: earnings
 document_type: report
 ```
 
 **Guidelines**
 
-- `blog` - Blog posts, newsletters, articles, commentary
+- `article` - News articles, magazine pieces, journalism
+- `blog` - Blog posts, newsletters, personal commentary, Substack posts
 - `whitepaper` - Technical whitepapers, research papers, academic publications
 - `transcript` - Interview transcripts, podcast transcripts, conference talks
 - `presentation` - Slide decks, investor presentations, pitch decks
