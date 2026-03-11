@@ -17,7 +17,7 @@ class ChatRequest(BaseModel):
 
     session_id: str
     message: str
-    model: str = "claude-3-5-sonnet-20250107"
+    model: str = "claude-sonnet-4-5-20250929"
     filters: Optional[dict] = None
 
 
@@ -99,13 +99,18 @@ async def get_models():
     return {
         "models": [
             ModelInfo(
-                id="claude-3-5-sonnet-20241022",
-                name="Claude 3.5 Sonnet (Oct)",
+                id="claude-sonnet-4-6",
+                name="Claude Sonnet 4.6",
                 provider="anthropic",
             ),
             ModelInfo(
-                id="claude-3-5-sonnet-20250107",
-                name="Claude 3.5 Sonnet (Jan)",
+                id="claude-sonnet-4-5-20250929",
+                name="Claude Sonnet 4.5 (Sep 2025)",
+                provider="anthropic",
+            ),
+            ModelInfo(
+                id="claude-opus-4-6",
+                name="Claude Opus 4.6",
                 provider="anthropic",
             ),
             ModelInfo(
@@ -114,7 +119,7 @@ async def get_models():
                 provider="openai",
             ),
         ],
-        "default": "claude-3-5-sonnet-20250107",
+        "default": "claude-sonnet-4-5-20250929",
     }
 
 
