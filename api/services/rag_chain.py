@@ -64,6 +64,8 @@ async def stream_rag_response(
     filter_sector: Optional[List[str]] = None,
     filter_entities: Optional[List[str]] = None,
     filter_sentiment: Optional[List[str]] = None,
+    filter_catalyst_window: Optional[List[str]] = None,
+    filter_weighting: Optional[List[int]] = None,
 ) -> AsyncIterator[dict]:
     """Stream RAG response with sources."""
 
@@ -73,6 +75,8 @@ async def stream_rag_response(
         filter_sector=filter_sector,
         filter_entities=filter_entities,
         filter_sentiment=filter_sentiment,
+        filter_catalyst_window=filter_catalyst_window,
+        filter_weighting=filter_weighting,
     )
 
     # Condense question if there's chat history

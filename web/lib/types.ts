@@ -28,6 +28,8 @@ export interface ChatFilters {
   sector?: string[] | null;
   entities?: string[] | null;
   sentiment?: string[] | null;
+  catalyst_window?: string[] | null;
+  weighting?: number[] | null;
   date_range?: {
     start?: string | null;
     end?: string | null;
@@ -40,6 +42,7 @@ export interface FilterOptions {
   sentiment: string[];
   document_type: string[];
   catalyst_window: string[];
+  weighting: number[];
 }
 
 export interface ModelInfo {

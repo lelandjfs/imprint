@@ -15,10 +15,11 @@ async def get_filters():
 
     Returns available values for:
     - sector
-    - entities (top 50 most frequent)
+    - entities (top 100 most frequent)
     - sentiment
     - document_type
     - catalyst_window
+    - weighting
     """
     settings = get_settings()
     supabase = create_client(settings.supabase_url, settings.supabase_anon_key)
@@ -28,6 +29,7 @@ async def get_filters():
     sentiment_response = supabase.table("imprint_documents").select("sentiment").execute()
     document_type_response = supabase.table("imprint_documents").select("document_type").execute()
     catalyst_window_response = supabase.table("imprint_documents").select("catalyst_window").execute()
+    weighting_response = supabase.table("imprint_documents").select("weighting").execute()
 
     # Get unique values
     sector_values = list(
@@ -42,6 +44,9 @@ async def get_filters():
     catalyst_window_values = list(
         {row["catalyst_window"] for row in catalyst_window_response.data if row.get("catalyst_window")}
     )
+    weighting_values = sorted(list(
+        {row["weighting"] for row in weighting_response.data if row.get("weighting") is not None}
+    ))
 
     # Get top entities (flatten arrays and count frequency)
     entities_response = (
@@ -53,8 +58,8 @@ async def get_filters():
             for entity in row["entities"]:
                 entity_counts[entity] = entity_counts.get(entity, 0) + 1
 
-    # Get top 50 entities
-    top_entities = sorted(entity_counts.items(), key=lambda x: x[1], reverse=True)[:50]
+    # Get top 100 entities (increased from 50 for better search coverage)
+    top_entities = sorted(entity_counts.items(), key=lambda x: x[1], reverse=True)[:100]
     entity_values = [entity for entity, count in top_entities]
 
     return {
@@ -63,4 +68,5 @@ async def get_filters():
         "sentiment": sorted(sentiment_values),
         "document_type": sorted(document_type_values),
         "catalyst_window": sorted(catalyst_window_values),
+        "weighting": weighting_values,
     }

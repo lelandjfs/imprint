@@ -18,6 +18,8 @@ class ImprintRetriever(BaseRetriever):
     filter_sector: Optional[List[str]] = None
     filter_entities: Optional[List[str]] = None
     filter_sentiment: Optional[List[str]] = None
+    filter_catalyst_window: Optional[List[str]] = None
+    filter_weighting: Optional[List[int]] = None
     filter_status: str = "active"
 
     class Config:
@@ -39,6 +41,8 @@ class ImprintRetriever(BaseRetriever):
                 "filter_sector": self.filter_sector,
                 "filter_entities": self.filter_entities,
                 "filter_sentiment": self.filter_sentiment,
+                "filter_catalyst_window": self.filter_catalyst_window,
+                "filter_weighting": self.filter_weighting,
                 "filter_status": self.filter_status,
             },
         ).execute()
@@ -75,6 +79,8 @@ def create_retriever(
     filter_sector: Optional[List[str]] = None,
     filter_entities: Optional[List[str]] = None,
     filter_sentiment: Optional[List[str]] = None,
+    filter_catalyst_window: Optional[List[str]] = None,
+    filter_weighting: Optional[List[int]] = None,
 ) -> ImprintRetriever:
     """Create a configured Imprint retriever."""
     settings = get_settings()
@@ -96,4 +102,6 @@ def create_retriever(
         filter_sector=filter_sector,
         filter_entities=filter_entities,
         filter_sentiment=filter_sentiment,
+        filter_catalyst_window=filter_catalyst_window,
+        filter_weighting=filter_weighting,
     )
