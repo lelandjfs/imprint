@@ -39,11 +39,13 @@ const SECTOR_OPTIONS = [
 const SENTIMENT_OPTIONS = ["bullish", "bearish", "neutral", "mixed"];
 
 const DOCUMENT_TYPE_OPTIONS = [
-  "memo",
-  "article",
-  "research_report",
+  "blog",
+  "whitepaper",
   "transcript",
   "presentation",
+  "earnings",
+  "report",
+  "image",
   "other",
 ];
 

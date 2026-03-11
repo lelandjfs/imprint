@@ -238,30 +238,34 @@ This helps filter by content type when researching or building digests.
 **Allowed values**
 
 ```
-memo
-article
-research_report
+blog
+whitepaper
 transcript
 presentation
+earnings
+report
+image
 other
 ```
 
 **Examples**
 
 ```
-document_type: memo
-document_type: article
-document_type: research_report
-document_type: transcript
+document_type: blog
+document_type: whitepaper
+document_type: earnings
+document_type: report
 ```
 
 **Guidelines**
 
-- `memo` - Internal research memos, investment theses, strategy notes
-- `article` - News articles, blog posts, newsletters
-- `research_report` - Formal research reports from banks, analysts, firms
-- `transcript` - Earnings calls, interviews, conference presentations
-- `presentation` - Slide decks, investor presentations
+- `blog` - Blog posts, newsletters, articles, commentary
+- `whitepaper` - Technical whitepapers, research papers, academic publications
+- `transcript` - Interview transcripts, podcast transcripts, conference talks
+- `presentation` - Slide decks, investor presentations, pitch decks
+- `earnings` - Earnings call transcripts, earnings releases, financial results
+- `report` - Research reports from banks/analysts, industry reports, formal analyses
+- `image` - Screenshots, charts, infographics, diagrams
 - `other` - Everything else
 
 ---
