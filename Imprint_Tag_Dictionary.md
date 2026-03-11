@@ -246,6 +246,7 @@ presentation
 earnings
 report
 image
+x_post
 other
 ```
 
@@ -254,8 +255,8 @@ other
 ```
 document_type: article
 document_type: blog
+document_type: x_post
 document_type: earnings
-document_type: report
 ```
 
 **Guidelines**
@@ -268,6 +269,7 @@ document_type: report
 - `earnings` - Earnings call transcripts, earnings releases, financial results
 - `report` - Research reports from banks/analysts, industry reports, formal analyses
 - `image` - Screenshots, charts, infographics, diagrams
+- `x_post` - Twitter/X posts, threads
 - `other` - Everything else
 
 ---

@@ -118,7 +118,7 @@ Given the document below, propose tags following the Imprint taxonomy. Return a 
 - sector: One sector (e.g., Infra, Software, Semiconductors, Security, Fintech, Healthcare, Energy, Industrial, Consumer, Macro, Government, Geopolitics)
 - entities: Array of companies/people/organizations. Use tickers for public companies (NVDA not Nvidia), canonical names for private (OpenAI not openai), full names for people (Jerome Powell)
 - sentiment: One of: bullish, bearish, neutral, mixed (the author's directional tone toward the topic/entities)
-- document_type: One of: article, blog, whitepaper, transcript, presentation, earnings, report, image, other
+- document_type: One of: article, blog, whitepaper, transcript, presentation, earnings, report, image, x_post, other
 - catalyst_window: (optional, null if not applicable) One of: immediate, near_term, medium_term, long_term, structural (leave null if document doesn't imply specific timing)
 - summary: One sentence takeaway capturing the core insight or signal
 

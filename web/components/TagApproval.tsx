@@ -47,6 +47,7 @@ const DOCUMENT_TYPE_OPTIONS = [
   "earnings",
   "report",
   "image",
+  "x_post",
   "other",
 ];
 
