@@ -33,7 +33,7 @@ export default function ChatSidebar({
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedModel] = useState("claude-sonnet-4-5-20250929");
+  const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-5-20250929");
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const activeThesis = theses.find((t) => t.id === activeThesisId);
@@ -110,6 +110,16 @@ export default function ChatSidebar({
             Click a thesis to activate
           </div>
         )}
+        <select
+          value={selectedModel}
+          onChange={(e) => setSelectedModel(e.target.value)}
+          className="w-full mt-2 px-2 py-1 text-xs border border-gray-200 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5</option>
+          <option value="claude-opus-4-5">Claude Opus 4.5</option>
+          <option value="gpt-4o">GPT-4o</option>
+          <option value="gpt-4o-mini">GPT-4o Mini</option>
+        </select>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
