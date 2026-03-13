@@ -93,6 +93,7 @@ def create_retriever(
     embeddings = OpenAIEmbeddings(
         model="text-embedding-3-large",
         dimensions=1536,
+        api_key=settings.openai_api_key,
     )
 
     return ImprintRetriever(

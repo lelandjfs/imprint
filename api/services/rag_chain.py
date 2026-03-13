@@ -7,21 +7,26 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage
 from services.retriever import create_retriever
+from config import get_settings
 
 
 def get_llm(model: str, streaming: bool = False):
     """Get LLM instance based on model name."""
+    settings = get_settings()
+
     if model.startswith("claude"):
         return ChatAnthropic(
             model=model,
             temperature=0,
             streaming=streaming,
+            api_key=settings.anthropic_api_key,
         )
     else:
         return ChatOpenAI(
             model=model,
             temperature=0,
             streaming=streaming,
+            api_key=settings.openai_api_key,
         )
 
 

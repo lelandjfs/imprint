@@ -4,7 +4,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import get_settings
-from routers import chat, filters, documents
+from routers import chat, filters, documents, theses
 
 
 # Set up LangSmith tracing if enabled
@@ -38,6 +38,7 @@ app.add_middleware(
 app.include_router(chat.router)
 app.include_router(filters.router)
 app.include_router(documents.router)
+app.include_router(theses.router)
 
 
 @app.get("/")

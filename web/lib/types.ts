@@ -58,3 +58,50 @@ export interface StreamEvent {
   full_response?: string;
   message?: string;
 }
+
+// ========== Thesis Types ==========
+
+export interface ThesisCitation {
+  id: string;
+  title: string;
+  sector: string | null;
+  sentiment: string | null;
+  summary: string | null;
+  document_id: string;
+  position: number;
+}
+
+export interface ThesisSection {
+  id: string;
+  thesis_id: string;
+  title: string;
+  content: string;
+  position: number;
+  collapsed: boolean;
+  citations: ThesisCitation[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Thesis {
+  id: string;
+  title: string;
+  position: number;
+  sections: ThesisSection[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DragPayload {
+  citation: ThesisCitation;
+  origin: "chip" | "sidebar";
+  fromSectionId: string | null;
+  fromThesisId: string | null;
+}
+
+export interface DragState {
+  payload: DragPayload;
+  x: number;
+  y: number;
+  overZoneId: string | null;
+}
