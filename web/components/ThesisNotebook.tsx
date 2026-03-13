@@ -538,15 +538,6 @@ export default function ThesisNotebook() {
             </div>
           </div>
 
-          <p className="text-xs text-gray-400 mb-10">
-            {dragState ? (
-              <span className="text-blue-500 font-medium">
-                ↓ drop onto any section's drop zone
-              </span>
-            ) : (
-              `${theses.length} theses · drag chips between sections · drag sources from chat · auto-saves on page close`
-            )}
-          </p>
 
           {theses.length === 0 ? (
             <div className="text-center py-20 text-gray-400">

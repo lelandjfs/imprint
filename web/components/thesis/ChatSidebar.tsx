@@ -116,22 +116,8 @@ export default function ChatSidebar({
         {messages.length === 0 && (
           <div className="pt-8 px-2 text-center">
             <div className="text-xl mb-2">💬</div>
-            <div className="text-xs text-gray-400 leading-relaxed mb-4">
-              Ask your research. Hit <strong className="text-gray-600">+</strong>{" "}
-              or drag sources to any section.
-            </div>
-            <div className="space-y-1.5">
-              {["What are the key risks?", "Latest developments?", "Market implications?"].map(
-                (s) => (
-                  <button
-                    key={s}
-                    onClick={() => setInput(s)}
-                    className="block w-full text-left px-3 py-1.5 text-xs text-gray-600 bg-gray-50 hover:bg-blue-50 hover:text-blue-700 rounded-lg border border-gray-200 transition-colors"
-                  >
-                    "{s}"
-                  </button>
-                )
-              )}
+            <div className="text-xs text-gray-400 leading-relaxed">
+              Ask questions about your research.
             </div>
           </div>
         )}
