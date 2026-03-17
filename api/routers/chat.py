@@ -5,6 +5,7 @@ from typing import Optional, List
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from langsmith import trace
 from services.rag_chain import stream_rag_response
 from services.memory import memory_store
 
@@ -58,22 +59,26 @@ async def chat(request: ChatRequest):
         async def event_stream():
             full_response = ""
             try:
-                async for chunk in stream_rag_response(
-                    question=request.message,
-                    chat_history=chat_history,
-                    model=request.model,
-                    filter_sector=filter_sector,
-                    filter_entities=filter_entities,
-                    filter_sentiment=filter_sentiment,
-                    filter_catalyst_window=filter_catalyst_window,
-                    filter_weighting=filter_weighting,
-                ):
-                    # Format as SSE
-                    yield f"data: {json.dumps(chunk)}\n\n"
+                # Wrap entire RAG pipeline in a single trace
+                with trace(name="Chat RAG Pipeline", run_type="chain",
+                          inputs={"question": request.message, "model": request.model},
+                          metadata={"session_id": request.session_id}):
+                    async for chunk in stream_rag_response(
+                        question=request.message,
+                        chat_history=chat_history,
+                        model=request.model,
+                        filter_sector=filter_sector,
+                        filter_entities=filter_entities,
+                        filter_sentiment=filter_sentiment,
+                        filter_catalyst_window=filter_catalyst_window,
+                        filter_weighting=filter_weighting,
+                    ):
+                        # Format as SSE
+                        yield f"data: {json.dumps(chunk)}\n\n"
 
-                    # Track full response
-                    if chunk["type"] == "done":
-                        full_response = chunk["full_response"]
+                        # Track full response
+                        if chunk["type"] == "done":
+                            full_response = chunk["full_response"]
 
                 # Add AI response to memory
                 if full_response:

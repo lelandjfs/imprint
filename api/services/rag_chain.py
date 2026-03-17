@@ -6,6 +6,7 @@ from langchain_core.output_parsers import StrOutputParser, PydanticOutputParser
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage
+from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, Field
 from services.retriever import create_retriever
 from config import get_settings
