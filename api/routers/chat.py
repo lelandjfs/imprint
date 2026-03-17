@@ -54,6 +54,7 @@ async def chat(request: ChatRequest):
         filter_sentiment = filters.get("sentiment")
         filter_catalyst_window = filters.get("catalyst_window")
         filter_weighting = filters.get("weighting")
+        filter_topic = filters.get("topic")
 
         # Stream response
         async def event_stream():
@@ -72,6 +73,7 @@ async def chat(request: ChatRequest):
                         filter_sentiment=filter_sentiment,
                         filter_catalyst_window=filter_catalyst_window,
                         filter_weighting=filter_weighting,
+                        filter_topic=filter_topic,
                     ):
                         # Format as SSE
                         yield f"data: {json.dumps(chunk)}\n\n"

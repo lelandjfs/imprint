@@ -115,16 +115,25 @@ export default function ChatSidebar({
             Click a thesis to activate
           </div>
         )}
-        <select
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(e.target.value)}
-          className="w-full mt-2 px-2 py-1 text-xs border border-gray-200 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5</option>
-          <option value="claude-opus-4-5">Claude Opus 4.5</option>
-          <option value="gpt-4o">GPT-4o</option>
-          <option value="gpt-4o-mini">GPT-4o Mini</option>
-        </select>
+        <div className="flex items-center gap-2 mt-2">
+          <select
+            value={selectedModel}
+            onChange={(e) => setSelectedModel(e.target.value)}
+            className="flex-1 px-2 py-1 text-xs border border-gray-200 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5</option>
+            <option value="claude-opus-4-5">Claude Opus 4.5</option>
+            <option value="gpt-4o">GPT-4o</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
+          </select>
+          <button
+            onClick={() => setMessages([])}
+            className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 rounded border border-gray-200 transition-colors whitespace-nowrap"
+            title="Clear conversation"
+          >
+            Clear
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">

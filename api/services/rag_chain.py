@@ -118,6 +118,7 @@ async def stream_rag_response(
     filter_sentiment: Optional[List[str]] = None,
     filter_catalyst_window: Optional[List[str]] = None,
     filter_weighting: Optional[List[int]] = None,
+    filter_topic: Optional[str] = None,
 ) -> AsyncIterator[dict]:
     """Stream RAG response with sources."""
 
@@ -144,11 +145,12 @@ async def stream_rag_response(
     final_entities = filter_entities if filter_entities else (query_metadata.entities if query_metadata.entities else None)
     final_sentiment = filter_sentiment if filter_sentiment else ([query_metadata.sentiment_intent] if query_metadata.sentiment_intent else None)
     final_catalyst = filter_catalyst_window if filter_catalyst_window else ([query_metadata.catalyst_window] if query_metadata.catalyst_window else None)
+    final_topic = filter_topic if filter_topic else query_metadata.topic
 
     # Log extracted metadata for debugging
     import logging
     logging.info(f"Query Analysis: {query_metadata.model_dump()}")
-    logging.info(f"Applied Filters - sector: {final_sector}, entities: {final_entities}, sentiment: {final_sentiment}, catalyst: {final_catalyst}")
+    logging.info(f"Applied Filters - sector: {final_sector}, entities: {final_entities}, sentiment: {final_sentiment}, catalyst: {final_catalyst}, topic: {final_topic}")
 
     # Yield query analysis for debugging/tracing
     yield {
@@ -171,7 +173,7 @@ async def stream_rag_response(
     seen_ids = set()
 
     # Path 1: Metadata-filtered retrieval (strict match)
-    if any([final_sector, final_entities, final_sentiment, final_catalyst]):
+    if any([final_sector, final_entities, final_sentiment, final_catalyst, final_topic]):
         metadata_retriever = create_retriever(
             k=10,  # Get more candidates with metadata filters
             filter_sector=final_sector,
@@ -179,6 +181,7 @@ async def stream_rag_response(
             filter_sentiment=final_sentiment,
             filter_catalyst_window=final_catalyst,
             filter_weighting=filter_weighting,
+            filter_topic=final_topic,
         )
         metadata_docs = await metadata_retriever.ainvoke(standalone_question)
         for doc in metadata_docs:
@@ -198,12 +201,13 @@ async def stream_rag_response(
     )
     semantic_docs = await semantic_retriever.ainvoke(standalone_question)
 
-    # Only add semantic results with similarity > 0.7 (strict semantic match)
+    # Only add semantic results with similarity > 0.4 (good semantic match)
+    # Note: 0.7 was way too strict - real queries get 0.3-0.6 similarity
     for doc in semantic_docs:
-        if doc.metadata["id"] not in seen_ids and doc.metadata.get("similarity", 0) > 0.7:
+        if doc.metadata["id"] not in seen_ids and doc.metadata.get("similarity", 0) > 0.4:
             docs.append(doc)
             seen_ids.add(doc.metadata["id"])
-    logging.info(f"Semantic retrieval added {len(semantic_docs)} docs (filtered by similarity > 0.7)")
+    logging.info(f"Semantic retrieval added {len([d for d in semantic_docs if d.metadata.get('similarity', 0) > 0.4])} docs (filtered by similarity > 0.4)")
 
     # Take top 5 results (combined from both paths)
     docs = sorted(docs, key=lambda x: x.metadata.get("similarity", 0), reverse=True)[:5]

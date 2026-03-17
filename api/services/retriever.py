@@ -20,6 +20,7 @@ class ImprintRetriever(BaseRetriever):
     filter_sentiment: Optional[List[str]] = None
     filter_catalyst_window: Optional[List[str]] = None
     filter_weighting: Optional[List[int]] = None
+    filter_topic: Optional[str] = None
     filter_status: str = "active"
 
     class Config:
@@ -29,23 +30,38 @@ class ImprintRetriever(BaseRetriever):
         self, query: str, *, run_manager: CallbackManagerForRetrieverRun
     ) -> List[Document]:
         """Retrieve documents relevant to query."""
+        import logging
+
         # Generate embedding for query
+        logging.info(f"Generating embedding for query: {query[:100]}")
         query_embedding = self.embeddings.embed_query(query)
+        logging.info(f"Embedding generated, length: {len(query_embedding)}")
 
         # Call Supabase RPC function
-        response = self.supabase_client.rpc(
-            "match_imprint_documents",
-            {
-                "query_embedding": query_embedding,
-                "match_count": self.k,
-                "filter_sector": self.filter_sector,
-                "filter_entities": self.filter_entities,
-                "filter_sentiment": self.filter_sentiment,
-                "filter_catalyst_window": self.filter_catalyst_window,
-                "filter_weighting": self.filter_weighting,
-                "filter_status": self.filter_status,
-            },
-        ).execute()
+        logging.info(f"Calling match_imprint_documents with k={self.k}, filters: sector={self.filter_sector}, entities={self.filter_entities}, topic={self.filter_topic}")
+        try:
+            response = self.supabase_client.rpc(
+                "match_imprint_documents",
+                {
+                    "query_embedding": query_embedding,
+                    "match_count": self.k,
+                    "filter_sector": self.filter_sector,
+                    "filter_entities": self.filter_entities,
+                    "filter_sentiment": self.filter_sentiment,
+                    "filter_catalyst_window": self.filter_catalyst_window,
+                    "filter_weighting": self.filter_weighting,
+                    "filter_topic": self.filter_topic,
+                    "filter_status": self.filter_status,
+                },
+            ).execute()
+
+            logging.info(f"Supabase returned {len(response.data) if response.data else 0} documents")
+            if response.data:
+                logging.info(f"First doc similarity: {response.data[0].get('similarity', 'N/A')}, title: {response.data[0].get('title', 'N/A')}")
+                logging.info(f"First doc entities: {response.data[0].get('entities', 'N/A')}, sector: {response.data[0].get('sector', 'N/A')}")
+        except Exception as e:
+            logging.error(f"Error calling Supabase RPC: {str(e)}")
+            raise
 
         # Convert to LangChain Documents
         documents = []
@@ -81,6 +97,7 @@ def create_retriever(
     filter_sentiment: Optional[List[str]] = None,
     filter_catalyst_window: Optional[List[str]] = None,
     filter_weighting: Optional[List[int]] = None,
+    filter_topic: Optional[str] = None,
 ) -> ImprintRetriever:
     """Create a configured Imprint retriever."""
     settings = get_settings()
@@ -105,4 +122,5 @@ def create_retriever(
         filter_sentiment=filter_sentiment,
         filter_catalyst_window=filter_catalyst_window,
         filter_weighting=filter_weighting,
+        filter_topic=filter_topic,
     )
