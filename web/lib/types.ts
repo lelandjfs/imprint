@@ -51,12 +51,22 @@ export interface ModelInfo {
   provider: string;
 }
 
+export interface QueryAnalysis {
+  topic: string | null;
+  entities: string[];
+  sectors: string[];
+  sentiment_intent: string | null;
+  catalyst_window: string | null;
+  search_intent: string;
+}
+
 export interface StreamEvent {
-  type: "sources" | "token" | "done" | "error";
+  type: "sources" | "token" | "done" | "error" | "query_analysis";
   documents?: Document[];
   content?: string;
   full_response?: string;
   message?: string;
+  analysis?: QueryAnalysis;
 }
 
 // ========== Thesis Types ==========

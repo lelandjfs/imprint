@@ -2,10 +2,11 @@
 
 from typing import List, Optional, AsyncIterator
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser, PydanticOutputParser
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage
+from pydantic import BaseModel, Field
 from services.retriever import create_retriever
 from config import get_settings
 
@@ -28,6 +29,51 @@ def get_llm(model: str, streaming: bool = False):
             streaming=streaming,
             api_key=settings.openai_api_key,
         )
+
+
+# Query analysis model
+class QueryAnalysis(BaseModel):
+    """Structured analysis of user query for metadata extraction."""
+
+    topic: Optional[str] = Field(
+        None,
+        description="Main topic of the query (e.g., 'energy transition', 'AI chips', 'biotech M&A')"
+    )
+    entities: List[str] = Field(
+        default_factory=list,
+        description="List of entities mentioned (companies, people, technologies, e.g., ['NVDA', 'Jensen Huang', 'H100'])"
+    )
+    sectors: List[str] = Field(
+        default_factory=list,
+        description="Relevant sectors (e.g., ['Energy', 'Semiconductors', 'Software']). Match exactly: Energy, Semiconductors, Infra, Software"
+    )
+    sentiment_intent: Optional[str] = Field(
+        None,
+        description="What sentiment is user asking about? Options: 'bullish', 'bearish', 'neutral', 'mixed', or null if not sentiment-focused"
+    )
+    catalyst_window: Optional[str] = Field(
+        None,
+        description="Time horizon user cares about. Options: 'near_term', 'medium_term', 'long_term', or null if not time-specific"
+    )
+    search_intent: str = Field(
+        description="What is user trying to find? Options: 'risks', 'opportunities', 'trends', 'comparison', 'facts', 'sentiment_analysis', 'general'"
+    )
+
+
+# Prompt for query analysis
+query_analysis_prompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        "You are a query analyzer for an investment research system. "
+        "Extract structured metadata from the user's question to enable precise document retrieval. "
+        "Be strict and specific - only extract what is explicitly mentioned or clearly implied.\n\n"
+        "Available sectors (use exact match): Energy, Semiconductors, Infra, Software\n"
+        "Available sentiment values: bullish, bearish, neutral, mixed\n"
+        "Available catalyst windows: near_term, medium_term, long_term\n\n"
+        "If the user mentions company tickers, expand them to entities (e.g., 'NVDA' → 'NVIDIA', 'TSLA' → 'Tesla')."
+    ),
+    ("human", "{question}")
+])
 
 
 # Prompt for condensing follow-up questions
@@ -74,16 +120,6 @@ async def stream_rag_response(
 ) -> AsyncIterator[dict]:
     """Stream RAG response with sources."""
 
-    # Create retriever with filters
-    retriever = create_retriever(
-        k=5,
-        filter_sector=filter_sector,
-        filter_entities=filter_entities,
-        filter_sentiment=filter_sentiment,
-        filter_catalyst_window=filter_catalyst_window,
-        filter_weighting=filter_weighting,
-    )
-
     # Condense question if there's chat history
     standalone_question = question
     if chat_history:
@@ -93,6 +129,43 @@ async def stream_rag_response(
             "input": question,
             "chat_history": chat_history
         })
+
+    # Analyze query to extract metadata filters
+    llm_for_analysis = get_llm(model, streaming=False)
+    analysis_chain = query_analysis_prompt | llm_for_analysis.with_structured_output(QueryAnalysis)
+
+    query_metadata: QueryAnalysis = await analysis_chain.ainvoke({
+        "question": standalone_question
+    })
+
+    # Merge auto-extracted filters with manual filters (manual takes precedence)
+    final_sector = filter_sector if filter_sector else (query_metadata.sectors if query_metadata.sectors else None)
+    final_entities = filter_entities if filter_entities else (query_metadata.entities if query_metadata.entities else None)
+    final_sentiment = filter_sentiment if filter_sentiment else ([query_metadata.sentiment_intent] if query_metadata.sentiment_intent else None)
+    final_catalyst = filter_catalyst_window if filter_catalyst_window else ([query_metadata.catalyst_window] if query_metadata.catalyst_window else None)
+
+    # Yield query analysis for debugging/tracing
+    yield {
+        "type": "query_analysis",
+        "analysis": {
+            "topic": query_metadata.topic,
+            "entities": query_metadata.entities,
+            "sectors": query_metadata.sectors,
+            "sentiment_intent": query_metadata.sentiment_intent,
+            "catalyst_window": query_metadata.catalyst_window,
+            "search_intent": query_metadata.search_intent,
+        }
+    }
+
+    # Create retriever with merged filters (strict matching)
+    retriever = create_retriever(
+        k=5,
+        filter_sector=final_sector,
+        filter_entities=final_entities,
+        filter_sentiment=final_sentiment,
+        filter_catalyst_window=final_catalyst,
+        filter_weighting=filter_weighting,
+    )
 
     # Retrieve documents using standalone question
     docs = await retriever.ainvoke(standalone_question)

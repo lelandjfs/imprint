@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Thesis, Document, DragState, DragPayload } from "@/lib/types";
+import { Thesis, Document, DragState, DragPayload, QueryAnalysis } from "@/lib/types";
 import { streamChat } from "@/lib/api";
 import SidebarSourceCard from "./SidebarSourceCard";
 
@@ -10,6 +10,7 @@ interface Message {
   role: "user" | "assistant";
   text: string;
   sources?: Document[];
+  queryAnalysis?: QueryAnalysis;
 }
 
 interface Props {
@@ -56,10 +57,13 @@ export default function ChatSidebar({
     try {
       let fullResponse = "";
       let sources: Document[] = [];
+      let queryAnalysis: QueryAnalysis | undefined;
 
       // Use real SSE streaming
       for await (const event of streamChat(sessionId, q, selectedModel)) {
-        if (event.type === "sources") {
+        if (event.type === "query_analysis") {
+          queryAnalysis = event.analysis;
+        } else if (event.type === "sources") {
           sources = event.documents || [];
         } else if (event.type === "token") {
           fullResponse += event.content || "";
@@ -76,6 +80,7 @@ export default function ChatSidebar({
           role: "assistant",
           text: fullResponse,
           sources,
+          queryAnalysis,
         },
       ]);
     } catch (error) {
@@ -154,6 +159,29 @@ export default function ChatSidebar({
                     </button>
                   )}
                 </div>
+                {msg.queryAnalysis && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-xs">
+                    <div className="font-semibold text-blue-700 mb-1">Query Analysis:</div>
+                    <div className="space-y-0.5 text-gray-600">
+                      {msg.queryAnalysis.topic && (
+                        <div><span className="font-medium">Topic:</span> {msg.queryAnalysis.topic}</div>
+                      )}
+                      {msg.queryAnalysis.entities.length > 0 && (
+                        <div><span className="font-medium">Entities:</span> {msg.queryAnalysis.entities.join(", ")}</div>
+                      )}
+                      {msg.queryAnalysis.sectors.length > 0 && (
+                        <div><span className="font-medium">Sectors:</span> {msg.queryAnalysis.sectors.join(", ")}</div>
+                      )}
+                      {msg.queryAnalysis.sentiment_intent && (
+                        <div><span className="font-medium">Sentiment:</span> {msg.queryAnalysis.sentiment_intent}</div>
+                      )}
+                      {msg.queryAnalysis.catalyst_window && (
+                        <div><span className="font-medium">Time Horizon:</span> {msg.queryAnalysis.catalyst_window}</div>
+                      )}
+                      <div><span className="font-medium">Intent:</span> {msg.queryAnalysis.search_intent}</div>
+                    </div>
+                  </div>
+                )}
                 {msg.sources && msg.sources.length > 0 && (
                   <div className="space-y-1.5 pl-0.5">
                     {msg.sources.map((src) => (
