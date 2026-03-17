@@ -140,12 +140,10 @@ async def stream_rag_response(
     })
 
     # Merge auto-extracted filters with manual filters (manual takes precedence)
-    # IMPORTANT: Only apply auto-extracted filters if they're very confident
-    # Otherwise rely on semantic search via embeddings
-    final_sector = filter_sector if filter_sector else None  # Don't auto-apply sector filter
-    final_entities = filter_entities if filter_entities else None  # Don't auto-apply entity filter
-    final_sentiment = filter_sentiment if filter_sentiment else None  # Don't auto-apply sentiment filter
-    final_catalyst = filter_catalyst_window if filter_catalyst_window else None  # Don't auto-apply catalyst filter
+    final_sector = filter_sector if filter_sector else (query_metadata.sectors if query_metadata.sectors else None)
+    final_entities = filter_entities if filter_entities else (query_metadata.entities if query_metadata.entities else None)
+    final_sentiment = filter_sentiment if filter_sentiment else ([query_metadata.sentiment_intent] if query_metadata.sentiment_intent else None)
+    final_catalyst = filter_catalyst_window if filter_catalyst_window else ([query_metadata.catalyst_window] if query_metadata.catalyst_window else None)
 
     # Log extracted metadata for debugging
     import logging
@@ -162,22 +160,54 @@ async def stream_rag_response(
             "sentiment_intent": query_metadata.sentiment_intent,
             "catalyst_window": query_metadata.catalyst_window,
             "search_intent": query_metadata.search_intent,
-            "note": "Filters shown for transparency - currently relying on semantic search"
         }
     }
 
-    # Create retriever with merged filters (strict matching)
-    retriever = create_retriever(
-        k=5,
-        filter_sector=final_sector,
-        filter_entities=final_entities,
-        filter_sentiment=final_sentiment,
-        filter_catalyst_window=final_catalyst,
-        filter_weighting=filter_weighting,
-    )
+    # HYBRID RETRIEVAL: Two-path approach
+    # Path 1: Strict metadata filtering (if filters exist)
+    # Path 2: Semantic search with high similarity threshold
 
-    # Retrieve documents using standalone question
-    docs = await retriever.ainvoke(standalone_question)
+    docs = []
+    seen_ids = set()
+
+    # Path 1: Metadata-filtered retrieval (strict match)
+    if any([final_sector, final_entities, final_sentiment, final_catalyst]):
+        metadata_retriever = create_retriever(
+            k=10,  # Get more candidates with metadata filters
+            filter_sector=final_sector,
+            filter_entities=final_entities,
+            filter_sentiment=final_sentiment,
+            filter_catalyst_window=final_catalyst,
+            filter_weighting=filter_weighting,
+        )
+        metadata_docs = await metadata_retriever.ainvoke(standalone_question)
+        for doc in metadata_docs:
+            if doc.metadata["id"] not in seen_ids:
+                docs.append(doc)
+                seen_ids.add(doc.metadata["id"])
+        logging.info(f"Metadata retrieval returned {len(metadata_docs)} docs")
+
+    # Path 2: Pure semantic search (no filters, high similarity threshold)
+    semantic_retriever = create_retriever(
+        k=10,
+        filter_sector=None,
+        filter_entities=None,
+        filter_sentiment=None,
+        filter_catalyst_window=None,
+        filter_weighting=None,
+    )
+    semantic_docs = await semantic_retriever.ainvoke(standalone_question)
+
+    # Only add semantic results with similarity > 0.7 (strict semantic match)
+    for doc in semantic_docs:
+        if doc.metadata["id"] not in seen_ids and doc.metadata.get("similarity", 0) > 0.7:
+            docs.append(doc)
+            seen_ids.add(doc.metadata["id"])
+    logging.info(f"Semantic retrieval added {len(semantic_docs)} docs (filtered by similarity > 0.7)")
+
+    # Take top 5 results (combined from both paths)
+    docs = sorted(docs, key=lambda x: x.metadata.get("similarity", 0), reverse=True)[:5]
+    logging.info(f"Final result count: {len(docs)}")
 
     # Yield sources first
     sources = [
