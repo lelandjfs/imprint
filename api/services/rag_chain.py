@@ -38,7 +38,7 @@ class QueryAnalysis(BaseModel):
 
     topic: Optional[str] = Field(
         None,
-        description="Main topic of the query (e.g., 'energy transition', 'AI chips', 'biotech M&A')"
+        description="Main topic keyword that matches database topics. Use canonical terms like: nuclear, ai, semiconductor, data_center, economic, saas, rare_earth, defense"
     )
     entities: List[str] = Field(
         default_factory=list,
@@ -71,6 +71,15 @@ query_analysis_prompt = ChatPromptTemplate.from_messages([
         "Available sectors (use exact match): Energy, Semiconductors, Infra, Software\n"
         "Available sentiment values: bullish, bearish, neutral, mixed\n"
         "Available catalyst windows: near_term, medium_term, long_term\n\n"
+        "Available topics (map user query to canonical keywords):\n"
+        "- nuclear (for: nuclear energy, SMRs, nuclear policy, defense nuclear)\n"
+        "- ai (for: AI training, AI infrastructure, GenAI, SaaS+AI integration)\n"
+        "- semiconductor (for: chips, GPUs, chip design, TSMC, NVDA hardware)\n"
+        "- data_center (for: hyperscalers, cloud compute, data center economics)\n"
+        "- economic (for: macro cycles, economic trends, market cycles)\n"
+        "- rare_earth (for: rare earth metals, supply chain security)\n\n"
+        "For topic extraction, use the canonical keyword (left side) that will thematically match related documents. "
+        "Examples: 'SMR buildout' → 'nuclear', 'GenAI training costs' → 'ai', 'TSMC margins' → 'semiconductor'.\n\n"
         "If the user mentions company tickers, expand them to entities (e.g., 'NVDA' → 'NVIDIA', 'TSLA' → 'Tesla')."
     ),
     ("human", "{question}")
