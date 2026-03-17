@@ -1,10 +1,17 @@
 """Imprint Chat API - FastAPI application."""
 
 import os
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import get_settings
 from routers import chat, filters, documents, theses
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 
 # Set up LangSmith tracing if enabled
