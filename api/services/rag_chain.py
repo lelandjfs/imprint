@@ -140,10 +140,17 @@ async def stream_rag_response(
     })
 
     # Merge auto-extracted filters with manual filters (manual takes precedence)
-    final_sector = filter_sector if filter_sector else (query_metadata.sectors if query_metadata.sectors else None)
-    final_entities = filter_entities if filter_entities else (query_metadata.entities if query_metadata.entities else None)
-    final_sentiment = filter_sentiment if filter_sentiment else ([query_metadata.sentiment_intent] if query_metadata.sentiment_intent else None)
-    final_catalyst = filter_catalyst_window if filter_catalyst_window else ([query_metadata.catalyst_window] if query_metadata.catalyst_window else None)
+    # IMPORTANT: Only apply auto-extracted filters if they're very confident
+    # Otherwise rely on semantic search via embeddings
+    final_sector = filter_sector if filter_sector else None  # Don't auto-apply sector filter
+    final_entities = filter_entities if filter_entities else None  # Don't auto-apply entity filter
+    final_sentiment = filter_sentiment if filter_sentiment else None  # Don't auto-apply sentiment filter
+    final_catalyst = filter_catalyst_window if filter_catalyst_window else None  # Don't auto-apply catalyst filter
+
+    # Log extracted metadata for debugging
+    import logging
+    logging.info(f"Query Analysis: {query_metadata.model_dump()}")
+    logging.info(f"Applied Filters - sector: {final_sector}, entities: {final_entities}, sentiment: {final_sentiment}, catalyst: {final_catalyst}")
 
     # Yield query analysis for debugging/tracing
     yield {
@@ -155,6 +162,7 @@ async def stream_rag_response(
             "sentiment_intent": query_metadata.sentiment_intent,
             "catalyst_window": query_metadata.catalyst_window,
             "search_intent": query_metadata.search_intent,
+            "note": "Filters shown for transparency - currently relying on semantic search"
         }
     }
 
