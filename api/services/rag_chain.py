@@ -38,7 +38,7 @@ class QueryAnalysis(BaseModel):
 
     topic: Optional[str] = Field(
         None,
-        description="Main topic keyword that matches database topics. Use canonical terms like: nuclear, ai, semiconductor, data_center, economic, saas, rare_earth, defense"
+        description="Core topic keyword extracted from query that semantically matches database topics. Extract the most specific keyword that will match via ILIKE pattern (e.g., 'nuclear', 'ai', 'semiconductor'). Return null if no clear topic match."
     )
     entities: List[str] = Field(
         default_factory=list,
@@ -71,15 +71,17 @@ query_analysis_prompt = ChatPromptTemplate.from_messages([
         "Available sectors (use exact match): Energy, Semiconductors, Infra, Software\n"
         "Available sentiment values: bullish, bearish, neutral, mixed\n"
         "Available catalyst windows: near_term, medium_term, long_term\n\n"
-        "Available topics (map user query to canonical keywords):\n"
-        "- nuclear (for: nuclear energy, SMRs, nuclear policy, defense nuclear)\n"
-        "- ai (for: AI training, AI infrastructure, GenAI, SaaS+AI integration)\n"
-        "- semiconductor (for: chips, GPUs, chip design, TSMC, NVDA hardware)\n"
-        "- data_center (for: hyperscalers, cloud compute, data center economics)\n"
-        "- economic (for: macro cycles, economic trends, market cycles)\n"
-        "- rare_earth (for: rare earth metals, supply chain security)\n\n"
-        "For topic extraction, use the canonical keyword (left side) that will thematically match related documents. "
-        "Examples: 'SMR buildout' → 'nuclear', 'GenAI training costs' → 'ai', 'TSMC margins' → 'semiconductor'.\n\n"
+        "Available topics in database: {available_topics}\n\n"
+        "For topic extraction:\n"
+        "1. Look at the user's query and identify the main theme/subject\n"
+        "2. Find a keyword from the available topics that would semantically match the query\n"
+        "3. Extract the core keyword (e.g., 'nuclear' from 'nuclear_energy_grid', 'ai' from 'ai_infrastructure')\n"
+        "4. This keyword will be used with ILIKE pattern matching to find all related topics\n\n"
+        "Examples:\n"
+        "- Query: 'SMR buildout trends' → topic: 'nuclear' (matches nuclear_energy_grid, nuclear_defense_policy)\n"
+        "- Query: 'GenAI training costs' → topic: 'ai' (matches ai_infrastructure, ai_data_training)\n"
+        "- Query: 'TSMC margins' → topic: 'semiconductor' (matches semiconductor_design_economics)\n"
+        "- Query: 'hyperscaler capex' → topic: 'data_center' (matches data_center_economics)\n\n"
         "If the user mentions company tickers, expand them to entities (e.g., 'NVDA' → 'NVIDIA', 'TSLA' → 'Tesla')."
     ),
     ("human", "{question}")
@@ -130,6 +132,9 @@ async def stream_rag_response(
     filter_topic: Optional[str] = None,
 ) -> AsyncIterator[dict]:
     """Stream RAG response with sources."""
+    import logging
+    from supabase import create_client
+    from config import get_settings
 
     # Condense question if there's chat history
     standalone_question = question
@@ -141,12 +146,25 @@ async def stream_rag_response(
             "chat_history": chat_history
         })
 
+    # Fetch available topics from database dynamically
+    settings = get_settings()
+    supabase_client = create_client(settings.supabase_url, settings.supabase_anon_key)
+    try:
+        response = supabase_client.table("imprint_documents").select("topic").execute()
+        available_topics = sorted(set(row["topic"] for row in response.data if row.get("topic")))
+        topics_str = ", ".join(available_topics)
+    except Exception as e:
+        logging.warning(f"Failed to fetch topics: {e}")
+        available_topics = []
+        topics_str = "nuclear_energy_grid, ai_infrastructure, semiconductor_design_economics, data_center_economics"
+
     # Analyze query to extract metadata filters
     llm_for_analysis = get_llm(model, streaming=False)
     analysis_chain = query_analysis_prompt | llm_for_analysis.with_structured_output(QueryAnalysis)
 
     query_metadata: QueryAnalysis = await analysis_chain.ainvoke({
-        "question": standalone_question
+        "question": standalone_question,
+        "available_topics": topics_str
     })
 
     # Merge auto-extracted filters with manual filters (manual takes precedence)
