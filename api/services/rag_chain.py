@@ -42,7 +42,7 @@ class QueryAnalysis(BaseModel):
     )
     entities: List[str] = Field(
         default_factory=list,
-        description="List of entities mentioned (companies, people, technologies, e.g., ['NVDA', 'Jensen Huang', 'H100'])"
+        description="List of entities mentioned (companies, people, technologies - NOT countries/locations, e.g., ['NVDA', 'Jensen Huang', 'H100']). Do not extract geographic locations like 'France', 'China', 'Europe' as entities."
     )
     sectors: List[str] = Field(
         default_factory=list,
@@ -108,7 +108,11 @@ query_analysis_prompt = ChatPromptTemplate.from_messages([
         "- Query: 'GenAI training costs' → topic: 'ai' (matches ai_infrastructure, ai_data_training)\n"
         "- Query: 'TSMC margins' → topic: 'semiconductor' (matches semiconductor_design_economics)\n"
         "- Query: 'hyperscaler capex' → topic: 'data_center' (matches data_center_economics)\n\n"
-        "If the user mentions company tickers, expand them to entities (e.g., 'NVDA' → 'NVIDIA', 'TSLA' → 'Tesla')."
+        "        "If the user mentions company tickers, expand them to entities (e.g., 'NVDA' → 'NVIDIA', 'TSLA' → 'Tesla').\n\n"
+        "IMPORTANT - Entity Extraction Rules:\n"
+        "- DO extract: Companies (NVIDIA, Microsoft), people (Jensen Huang), technologies (H100, Blackwell)\n"
+        "- DO NOT extract: Countries (France, China), regions (Europe, Asia), geographic locations\n"
+        "- Geographic queries should use topic/sector filtering, not entities""
     ),
     ("human", "{question}")
 ])
@@ -298,13 +302,13 @@ async def stream_rag_response(
     )
     semantic_docs = await semantic_retriever.ainvoke(standalone_question)
 
-    # Only add semantic results with similarity > 0.4 (good semantic match)
-    # Note: 0.7 was way too strict - real queries get 0.3-0.6 similarity
+    # Only add semantic results with similarity > 0.3 (good semantic match)
+    # Note: 0.7 was way too strict, 0.4 still misses good matches - real queries get 0.3-0.6 similarity
     for doc in semantic_docs:
-        if doc.metadata["id"] not in seen_ids and doc.metadata.get("similarity", 0) > 0.4:
+        if doc.metadata["id"] not in seen_ids and doc.metadata.get("similarity", 0) > 0.3:
             docs.append(doc)
             seen_ids.add(doc.metadata["id"])
-    logging.info(f"Semantic retrieval added {len([d for d in semantic_docs if d.metadata.get('similarity', 0) > 0.4])} docs (filtered by similarity > 0.4)")
+    logging.info(f"Semantic retrieval added {len([d for d in semantic_docs if d.metadata.get('similarity', 0) > 0.3])} docs (filtered by similarity > 0.3)")
 
     # Take top 5 results (combined from both paths)
     docs = sorted(docs, key=lambda x: x.metadata.get("similarity", 0), reverse=True)[:5]
