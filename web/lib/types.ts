@@ -9,6 +9,13 @@ export interface Message {
   sources?: Document[];
 }
 
+export interface DocumentAnalysis {
+  summary: string;
+  key_excerpt: string;
+  thesis_signal: "bullish" | "bearish" | "neutral" | "mixed";
+  thesis_utility: string;
+}
+
 export interface Document {
   id: number;
   title: string;
@@ -22,6 +29,7 @@ export interface Document {
   weighting: number | null;
   source_url: string | null;
   similarity: number;
+  analysis?: DocumentAnalysis;
 }
 
 export interface ChatFilters {
@@ -61,12 +69,13 @@ export interface QueryAnalysis {
 }
 
 export interface StreamEvent {
-  type: "sources" | "token" | "done" | "error" | "query_analysis";
+  type: "sources" | "token" | "done" | "error" | "query_analysis" | "run_id";
   documents?: Document[];
   content?: string;
   full_response?: string;
   message?: string;
   analysis?: QueryAnalysis;
+  run_id?: string;
 }
 
 // ========== Thesis Types ==========

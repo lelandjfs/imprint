@@ -13,6 +13,16 @@ const sentimentDot = (s: string | null) => {
   return map[s || ""] || "bg-gray-300";
 };
 
+const signalColor = (signal: string | undefined) => {
+  const map: Record<string, string> = {
+    bullish: "text-emerald-700 bg-emerald-50 border-emerald-200",
+    bearish: "text-red-700 bg-red-50 border-red-200",
+    neutral: "text-gray-700 bg-gray-50 border-gray-200",
+    mixed: "text-amber-700 bg-amber-50 border-amber-200",
+  };
+  return map[signal || ""] || "text-gray-600 bg-gray-100 border-gray-200";
+};
+
 const sectorColor = (s: string | null) => {
   const map: Record<string, string> = {
     Energy: "text-amber-700 bg-amber-50 border-amber-200",
@@ -99,7 +109,7 @@ export default function SidebarSourceCard({
           >
             {source.title}
           </div>
-          <div className="flex items-center gap-1.5 mt-1">
+          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
             {source.sector && (
               <span
                 className={`text-xs px-1.5 py-0.5 rounded border font-medium ${sectorColor(
@@ -109,11 +119,41 @@ export default function SidebarSourceCard({
                 {source.sector}
               </span>
             )}
+            {source.analysis?.thesis_signal && (
+              <span
+                className={`text-xs px-1.5 py-0.5 rounded border font-medium ${signalColor(
+                  source.analysis.thesis_signal
+                )}`}
+              >
+                {source.analysis.thesis_signal}
+              </span>
+            )}
           </div>
-          {expanded && source.summary && (
-            <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-              {source.summary}
-            </p>
+          {expanded && (
+            <div className="mt-2 space-y-2 text-xs">
+              {source.analysis ? (
+                <>
+                  <div>
+                    <div className="font-semibold text-gray-700 mb-0.5">Summary</div>
+                    <p className="text-gray-600 leading-relaxed">{source.analysis.summary}</p>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-700 mb-0.5">Key Excerpt</div>
+                    <p className="text-gray-500 italic leading-relaxed border-l-2 border-gray-200 pl-2">
+                      "{source.analysis.key_excerpt}"
+                    </p>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-700 mb-0.5">Thesis Utility</div>
+                    <p className="text-gray-600 leading-relaxed">{source.analysis.thesis_utility}</p>
+                  </div>
+                </>
+              ) : (
+                source.summary && (
+                  <p className="text-gray-500 leading-relaxed">{source.summary}</p>
+                )
+              )}
+            </div>
           )}
         </div>
         {alreadyCited ? (

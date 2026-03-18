@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Thesis, Document, DragState, DragPayload, QueryAnalysis } from "@/lib/types";
-import { streamChat } from "@/lib/api";
+import { streamChat, submitFeedback } from "@/lib/api";
 import SidebarSourceCard from "./SidebarSourceCard";
 
 interface Message {
@@ -11,6 +11,8 @@ interface Message {
   text: string;
   sources?: Document[];
   queryAnalysis?: QueryAnalysis;
+  runId?: string;
+  feedback?: number; // 1 for thumbs up, 0 for thumbs down, undefined if not given
 }
 
 interface Props {
@@ -46,6 +48,23 @@ export default function ChatSidebar({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  const handleFeedback = async (messageIndex: number, score: number) => {
+    const message = messages[messageIndex];
+    if (!message.runId) return;
+
+    try {
+      await submitFeedback(message.runId, score);
+      // Update message with feedback
+      setMessages((prev) =>
+        prev.map((msg, idx) =>
+          idx === messageIndex ? { ...msg, feedback: score } : msg
+        )
+      );
+    } catch (error) {
+      console.error("Failed to submit feedback:", error);
+    }
+  };
+
   const send = async () => {
     if (!input.trim()) return;
 
@@ -58,6 +77,7 @@ export default function ChatSidebar({
       let fullResponse = "";
       let sources: Document[] = [];
       let queryAnalysis: QueryAnalysis | undefined;
+      let runId: string | undefined;
 
       // Use real SSE streaming
       for await (const event of streamChat(sessionId, q, selectedModel)) {
@@ -69,6 +89,8 @@ export default function ChatSidebar({
           fullResponse += event.content || "";
         } else if (event.type === "done") {
           fullResponse = event.full_response || fullResponse;
+        } else if (event.type === "run_id") {
+          runId = event.run_id;
         } else if (event.type === "error") {
           console.error("Chat error:", event.message);
         }
@@ -81,6 +103,7 @@ export default function ChatSidebar({
           text: fullResponse,
           sources,
           queryAnalysis,
+          runId,
         },
       ]);
     } catch (error) {
@@ -158,15 +181,43 @@ export default function ChatSidebar({
               <div className="space-y-2">
                 <div className="bg-gray-50 border border-gray-200 text-gray-700 text-xs px-3 py-2.5 rounded-2xl rounded-tl-sm leading-relaxed">
                   {msg.text}
-                  {activeThesis && (
-                    <button
-                      onClick={() => onAddText(msg.text)}
-                      className="mt-2 pt-2 border-t border-gray-200 w-full flex items-center gap-1.5 text-gray-400 hover:text-blue-600 transition-colors"
-                    >
-                      <span className="text-sm">+</span>
-                      <span className="text-xs">add to {activeThesis.title}</span>
-                    </button>
-                  )}
+                  <div className="mt-2 pt-2 border-t border-gray-200 flex items-center justify-between">
+                    {activeThesis && (
+                      <button
+                        onClick={() => onAddText(msg.text)}
+                        className="flex items-center gap-1.5 text-gray-400 hover:text-blue-600 transition-colors"
+                      >
+                        <span className="text-sm">+</span>
+                        <span className="text-xs">add to {activeThesis.title}</span>
+                      </button>
+                    )}
+                    {msg.runId && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleFeedback(i, 1)}
+                          className={`p-1 rounded transition-colors ${
+                            msg.feedback === 1
+                              ? "text-green-600"
+                              : "text-gray-400 hover:text-green-600"
+                          }`}
+                          title="Thumbs up"
+                        >
+                          👍
+                        </button>
+                        <button
+                          onClick={() => handleFeedback(i, 0)}
+                          className={`p-1 rounded transition-colors ${
+                            msg.feedback === 0
+                              ? "text-red-600"
+                              : "text-gray-400 hover:text-red-600"
+                          }`}
+                          title="Thumbs down"
+                        >
+                          👎
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {msg.queryAnalysis && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-xs">

@@ -61,6 +61,32 @@ class QueryAnalysis(BaseModel):
     )
 
 
+# Document analysis model
+class DocumentAnalysis(BaseModel):
+    """Structured analysis of a document for thesis development."""
+
+    summary: str = Field(
+        description="2-3 sentence summary of the key insight relevant to the user's query"
+    )
+    key_excerpt: str = Field(
+        description="Most relevant direct quote from the document (50-100 words)"
+    )
+    thesis_signal: str = Field(
+        description="Investment signal from this document. Options: 'bullish', 'bearish', 'neutral', 'mixed'"
+    )
+    thesis_utility: str = Field(
+        description="How an investor could use this information in an investment thesis (1-2 sentences)"
+    )
+
+
+class DocumentAnalysisResponse(BaseModel):
+    """Batch analysis response for multiple documents."""
+
+    analyses: List[DocumentAnalysis] = Field(
+        description="Analysis for each document in the same order as input"
+    )
+
+
 # Prompt for query analysis
 query_analysis_prompt = ChatPromptTemplate.from_messages([
     (
@@ -85,6 +111,22 @@ query_analysis_prompt = ChatPromptTemplate.from_messages([
         "If the user mentions company tickers, expand them to entities (e.g., 'NVDA' → 'NVIDIA', 'TSLA' → 'Tesla')."
     ),
     ("human", "{question}")
+])
+
+
+# Prompt for document analysis
+document_analysis_prompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        "You are an investment research analyst analyzing documents to help build investment theses.\n\n"
+        "For each document provided, you must:\n"
+        "1. Summary: Extract the 2-3 sentence key insight most relevant to the user's query\n"
+        "2. Key Excerpt: Find the most important direct quote (50-100 words)\n"
+        "3. Thesis Signal: Determine if this is bullish, bearish, neutral, or mixed for the topic\n"
+        "4. Thesis Utility: Explain how an investor could use this in an investment thesis\n\n"
+        "User Query: {question}\n\n"
+        "Documents to analyze:\n{documents}"
+    )
 ])
 
 
@@ -240,7 +282,43 @@ async def stream_rag_response(
     docs = sorted(docs, key=lambda x: x.metadata.get("similarity", 0), reverse=True)[:5]
     logging.info(f"Final result count: {len(docs)}")
 
-    # Yield sources first
+    # Analyze documents for thesis utility
+    analyses = []
+    if docs:
+        try:
+            # Format documents for analysis
+            docs_text = "\n\n---\n\n".join([
+                f"Document {i+1}: {doc.metadata['title']}\n"
+                f"Topic: {doc.metadata['topic']} | Sector: {doc.metadata['sector']}\n"
+                f"Summary: {doc.metadata['summary']}\n\n"
+                f"Content excerpt:\n{doc.page_content[:1000]}"
+                for i, doc in enumerate(docs)
+            ])
+
+            # Run analysis chain
+            llm_for_analysis = get_llm(model, streaming=False)
+            analysis_chain = document_analysis_prompt | llm_for_analysis.with_structured_output(DocumentAnalysisResponse)
+
+            analysis_response: DocumentAnalysisResponse = await analysis_chain.ainvoke({
+                "question": standalone_question,
+                "documents": docs_text
+            })
+
+            analyses = [
+                {
+                    "summary": analysis.summary,
+                    "key_excerpt": analysis.key_excerpt,
+                    "thesis_signal": analysis.thesis_signal,
+                    "thesis_utility": analysis.thesis_utility
+                }
+                for analysis in analysis_response.analyses
+            ]
+            logging.info(f"Generated {len(analyses)} document analyses")
+        except Exception as e:
+            logging.error(f"Error analyzing documents: {str(e)}")
+            # Continue without analysis if it fails
+
+    # Yield sources with analysis
     sources = [
         {
             "id": doc.metadata["id"],
@@ -255,8 +333,9 @@ async def stream_rag_response(
             "entities": doc.metadata["entities"],
             "source_url": doc.metadata["source_url"],
             "similarity": doc.metadata["similarity"],
+            "analysis": analyses[i] if i < len(analyses) else None,
         }
-        for doc in docs
+        for i, doc in enumerate(docs)
     ]
     yield {"type": "sources", "documents": sources}
 

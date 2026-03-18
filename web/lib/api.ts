@@ -107,6 +107,24 @@ export async function clearSession(sessionId: string): Promise<void> {
   }
 }
 
+/**
+ * Submit feedback for a LangSmith run
+ */
+export async function submitFeedback(
+  runId: string,
+  score: number,
+  comment?: string
+): Promise<void> {
+  const response = await fetch(`${API_URL}/api/feedback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ run_id: runId, score, comment }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to submit feedback: ${response.statusText}`);
+  }
+}
+
 // ========== Thesis API Functions ==========
 
 /**
