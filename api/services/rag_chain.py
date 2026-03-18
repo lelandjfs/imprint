@@ -135,9 +135,22 @@ condense_question_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "Given the conversation history and a follow-up question, "
-            "rephrase the question as a standalone query that captures all necessary context. "
-            "If it's already standalone, return it unchanged.",
+            "You are a query reformulation assistant. Your ONLY job is to rephrase questions.\n\n"
+            "Given a conversation history and a follow-up question, rephrase the follow-up question "
+            "as a standalone query that includes necessary context from the history.\n\n"
+            "CRITICAL RULES:\n"
+            "- Output ONLY the rephrased question\n"
+            "- Do NOT answer the question\n"
+            "- Do NOT say 'Based on the context' or similar phrases\n"
+            "- Do NOT provide any information or analysis\n"
+            "- If the question is already standalone, return it unchanged\n\n"
+            "Examples:\n"
+            "History: [User asked about nuclear energy]\n"
+            "Follow-up: 'What about France?'\n"
+            "Output: 'What information do we have about France and nuclear energy?'\n\n"
+            "History: [User asked about data centers]\n"
+            "Follow-up: 'What are the trends?'\n"
+            "Output: 'What are the trends in data center development?'",
         ),
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}"),
