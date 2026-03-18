@@ -8,6 +8,8 @@ import re
 import base64
 import json
 from datetime import datetime
+from typing import List, Optional
+from pydantic import BaseModel, Field
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from openai import OpenAI
@@ -145,19 +147,38 @@ def parse_forwarded_email(body, headers):
     return result
 
 
+class DocumentTags(BaseModel):
+    """Structured tags for a document."""
+    topic: str = Field(
+        description="One specific topic (e.g., ai_inference_economics, gpu_supply_constraints) - be specific and mechanism-focused, not vague"
+    )
+    sector: str = Field(
+        description="One sector: Infra, Software, Semiconductors, Security, Fintech, Healthcare, Energy, Industrial, Consumer, Macro, Government, or Geopolitics"
+    )
+    entities: List[str] = Field(
+        default_factory=list,
+        description="Array of companies/people/organizations. Use tickers for public companies (NVDA not Nvidia), canonical names for private (OpenAI not openai), full names for people (Jerome Powell)"
+    )
+    sentiment: str = Field(
+        description="One of: bullish, bearish, neutral, mixed (the author's directional tone toward the topic/entities)"
+    )
+    document_type: str = Field(
+        description="One of: article, blog, whitepaper, transcript, presentation, earnings, report, image, x_post, other"
+    )
+    catalyst_window: Optional[str] = Field(
+        None,
+        description="One of: immediate, near_term, medium_term, long_term, structural (leave null if document doesn't imply specific timing)"
+    )
+    summary: str = Field(
+        description="One sentence takeaway capturing the core insight or signal"
+    )
+
+
 def propose_tags(document):
-    """Use Claude to propose tags for a document."""
+    """Use Claude to propose tags for a document using structured output."""
     prompt = f"""You are a research librarian helping categorize investment research documents for market-linkable research.
 
-Given the document below, propose tags following the Imprint taxonomy. Return a JSON object with these fields:
-
-- topic: One specific topic (e.g., ai_inference_economics, gpu_supply_constraints) - be specific and mechanism-focused, not vague
-- sector: One sector (e.g., Infra, Software, Semiconductors, Security, Fintech, Healthcare, Energy, Industrial, Consumer, Macro, Government, Geopolitics)
-- entities: Array of companies/people/organizations. Use tickers for public companies (NVDA not Nvidia), canonical names for private (OpenAI not openai), full names for people (Jerome Powell)
-- sentiment: One of: bullish, bearish, neutral, mixed (the author's directional tone toward the topic/entities)
-- document_type: One of: article, blog, whitepaper, transcript, presentation, earnings, report, image, x_post, other
-- catalyst_window: (optional, null if not applicable) One of: immediate, near_term, medium_term, long_term, structural (leave null if document doesn't imply specific timing)
-- summary: One sentence takeaway capturing the core insight or signal
+Given the document below, propose tags following the Imprint taxonomy.
 
 Reference taxonomy (examples, not exhaustive):
 {TAG_DICTIONARY[:3000]}
@@ -165,25 +186,28 @@ Reference taxonomy (examples, not exhaustive):
 Document title: {document['title']}
 Document author: {document.get('author', 'Unknown')}
 Document content (first 8000 chars):
-{document['content'][:8000]}
+{document['content'][:8000]}"""
 
-Return ONLY valid JSON, no other text."""
-
-    response = anthropic_client.messages.create(
+    client = anthropic.Anthropic()
+    response = client.messages.create(
         model="claude-3-haiku-20240307",
         max_tokens=1000,
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
+        tools=[{
+            "name": "document_tags",
+            "description": "Tags for categorizing an investment research document",
+            "input_schema": DocumentTags.model_json_schema()
+        }],
+        tool_choice={"type": "tool", "name": "document_tags"}
     )
 
-    # Parse JSON from response
-    response_text = response.content[0].text
-    # Handle potential markdown code blocks
-    if '```json' in response_text:
-        response_text = response_text.split('```json')[1].split('```')[0]
-    elif '```' in response_text:
-        response_text = response_text.split('```')[1].split('```')[0]
+    # Extract structured output from tool use
+    for block in response.content:
+        if block.type == "tool_use" and block.name == "document_tags":
+            return block.input
 
-    return json.loads(response_text.strip())
+    # Fallback (should not happen with tool_choice)
+    raise ValueError("No structured output returned from Claude")
 
 
 def generate_embedding(text):
