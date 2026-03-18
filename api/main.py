@@ -16,10 +16,15 @@ logging.basicConfig(
 
 # Set up LangSmith tracing if enabled
 settings = get_settings()
+logging.info(f"LangSmith config - tracing: {settings.langsmith_tracing}, api_key: {'SET' if settings.langsmith_api_key else 'NOT SET'}, project: {settings.langsmith_project}")
+
 if settings.langsmith_tracing and settings.langsmith_api_key:
     os.environ["LANGSMITH_TRACING"] = "true"
     os.environ["LANGSMITH_API_KEY"] = settings.langsmith_api_key
     os.environ["LANGSMITH_PROJECT"] = settings.langsmith_project
+    logging.info("✓ LangSmith tracing ENABLED")
+else:
+    logging.warning(f"✗ LangSmith tracing DISABLED - tracing={settings.langsmith_tracing}, has_key={bool(settings.langsmith_api_key)}")
 
 
 # Create FastAPI app
