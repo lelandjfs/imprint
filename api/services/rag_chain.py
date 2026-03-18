@@ -42,7 +42,7 @@ class QueryAnalysis(BaseModel):
     )
     entities: List[str] = Field(
         default_factory=list,
-        description="List of entities mentioned (companies, people, technologies - NOT countries/locations, e.g., ['NVDA', 'Jensen Huang', 'H100']). Do not extract geographic locations like 'France', 'China', 'Europe' as entities."
+        description="List of entities mentioned (companies, people, countries, technologies, e.g., ['NVDA', 'Jensen Huang', 'France', 'H100'])"
     )
     sectors: List[str] = Field(
         default_factory=list,
@@ -108,11 +108,7 @@ query_analysis_prompt = ChatPromptTemplate.from_messages([
         "- Query: 'GenAI training costs' -> topic: 'ai' (matches ai_infrastructure, ai_data_training)\n"
         "- Query: 'TSMC margins' -> topic: 'semiconductor' (matches semiconductor_design_economics)\n"
         "- Query: 'hyperscaler capex' -> topic: 'data_center' (matches data_center_economics)\n\n"
-        "        "If the user mentions company tickers, expand them to entities (e.g., 'NVDA' -> 'NVIDIA', 'TSLA' -> 'Tesla').\n\n"
-        "IMPORTANT - Entity Extraction Rules:\n"
-        "- DO extract: Companies (NVIDIA, Microsoft), people (Jensen Huang), technologies (H100, Blackwell)\n"
-        "- DO NOT extract: Countries (France, China), regions (Europe, Asia), geographic locations\n"
-        "- Geographic queries should use topic/sector filtering, not entities""
+        "If the user mentions company tickers, expand them to entities (e.g., 'NVDA' -> 'NVIDIA', 'TSLA' -> 'Tesla')."
     ),
     ("human", "{question}")
 ])
