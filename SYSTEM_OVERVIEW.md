@@ -1,6 +1,6 @@
 # Imprint — System Overview
 
-**Last Updated:** March 10, 2026
+**Last Updated:** March 17, 2026
 
 ---
 
@@ -9,10 +9,11 @@
 Imprint is a personal research knowledge base for investment research. It ingests documents from multiple sources, tags them with market-linkable metadata, and provides semantic search + RAG chat for surfacing relevant insights.
 
 **Core workflow:**
-1. Ingest documents from Gmail, Safari bookmarks, Google Drive
-2. Auto-tag with LLM (topic, sector, entities, sentiment, etc.)
+1. Ingest documents from Gmail, Safari bookmarks, Google Drive (automated daily at 9pm)
+2. Auto-tag with LLM using structured outputs (topic, sector, entities, sentiment, etc.)
 3. Review and refine tags via web UI
-4. Chat with your research using RAG
+4. Chat with your research using hybrid RAG retrieval
+5. Build investment theses with drag-and-drop citations
 
 ---
 
@@ -67,36 +68,50 @@ Imprint has 4 automated ingestion pipelines:
 ### 1. Email (`ingest_email.py`)
 - **Source:** Gmail messages with "Imprint" label
 - **Content:** Plain text from email body
-- **Schedule:** Daily at 9pm (cron)
+- **Tagging:** Claude Haiku with structured outputs (Pydantic + tool calling)
+- **Schedule:** Daily at 9pm (launchd)
 
 ### 2. Bookmarks (`ingest_bookmark.py`)
 - **Source:** Safari "Imprint" bookmarks folder
 - **Fetch:** Jina Reader API → Parallel Extract API (for paywalls/CAPTCHAs)
-- **Schedule:** Daily at 9pm (cron)
+- **Tagging:** Claude Haiku with structured outputs
+- **Schedule:** Daily at 9pm (launchd)
 
 ### 3. PDF (`ingest_pdf.py`)
 - **Source:** Google Drive "Imprint" folder (root)
-- **Extraction:** PyPDF2 text extraction
-- **Schedule:** Daily at 9pm (cron)
+- **Extraction:** PyMuPDF text extraction + LLM-based content cleaning
+- **Tagging:** Claude Haiku with structured outputs
+- **Schedule:** Daily at 9pm (launchd)
 
 ### 4. Vision (`ingest_vision.py`)
 - **Source:** Google Drive "Imprint/Vision" subfolder
-- **Extraction:** Claude Sonnet with vision for charts/screenshots
-- **Schedule:** Daily at 9pm (cron)
+- **Extraction:** GPT-4o vision for charts/screenshots
+- **Tagging:** Claude Haiku with structured outputs
+- **Schedule:** Daily at 9pm (launchd)
 
 ### Master Script
 - **`ingest_all.py`** orchestrates all 4 pipelines
-- **`run_ingestion.sh`** runs master script via cron (9pm daily)
+- **`run_ingestion.sh`** runs master script via launchd (9pm daily)
+- **`refresh_google_auth.py`** - tool for refreshing Google OAuth tokens
 - Logs to `logs/ingestion_YYYYMMDD_HHMMSS.log`
-- Sends email summary after completion
+- Sends email summary after completion to `leland.speth@gmail.com`
 
 ### Ingestion Flow
 1. Fetch content from source
-2. Clean and normalize text (`imprint_utils.py`)
-3. Propose tags via Claude (`propose_tags()`)
-4. Generate embedding via OpenAI
+2. Clean and normalize text (`imprint_utils.py` - LLM-based ad/chrome removal)
+3. **Propose tags via Claude using structured outputs** (`propose_tags()`)
+   - Uses Anthropic tool calling with `tool_choice` to force schema compliance
+   - Pydantic `DocumentTags` model ensures valid output
+   - **No more JSON parsing errors** - schema is guaranteed
+4. Generate embedding via OpenAI (text-embedding-3-large @ 1536 dims)
 5. Store in Supabase with `status='pending_review'`
 6. Log to `ingestion_log` table
+
+### Google OAuth Token Management
+- **Published app** - no more 7-day token expiration
+- **Auto-refresh** - tokens persist long-term
+- **Manual refresh:** Run `python3 refresh_google_auth.py` if token expires
+- Tokens stored in `token.json` (gitignored)
 
 ---
 
@@ -119,29 +134,79 @@ Imprint has 4 automated ingestion pipelines:
 
 ---
 
+## Thesis Notebook
+
+**Web UI:** `web/app/thesis/page.tsx` + `web/components/thesis/`
+
+A dedicated workspace for building structured investment theses with drag-and-drop citations from chat results.
+
+**Features:**
+- **Multi-thesis management** - Create and switch between multiple theses
+- **Structured sections** - Organize arguments with custom section headers
+- **Drag-and-drop citations** - Drag documents from chat sidebar directly into thesis
+- **Citation management** - Each section tracks cited documents with metadata
+- **Export** - Copy thesis text with citations for external use
+- **Persistent state** - Theses saved in browser localStorage
+
+**Workflow:**
+1. Chat with research in sidebar
+2. Drag relevant documents into active thesis
+3. Organize into logical sections
+4. Build comprehensive investment argument
+5. Export for presentation or further analysis
+
+**Components:**
+- `ThesisNotebook.tsx` - Main thesis editor with sections
+- `ChatSidebar.tsx` - Chat interface with draggable source cards
+- `SidebarSourceCard.tsx` - Individual source card with drag handle
+- `ThesisList.tsx` - Thesis switcher/creator
+
+---
+
 ## Chat Interface
 
 **Backend:** `api/routers/chat.py` + `api/services/rag_chain.py`
 
 **RAG Pipeline:**
 1. **Condense question** (if chat history exists) - rephrases follow-up questions as standalone queries
-2. **Retrieve documents** - Vector similarity search via Supabase RPC (`match_imprint_documents`)
-3. **Filter by metadata** - Sector, entities, sentiment filters
-4. **Format context** - Inject retrieved document chunks into prompt
-5. **Stream response** - Server-Sent Events (SSE) for real-time token streaming
+   - Uses dedicated prompt with strict "no answering" rules to prevent hallucination
+2. **Query analysis** - Extract metadata from user question using structured outputs
+   - Topic, entities, sectors, sentiment intent, catalyst window, search intent
+   - Automatically applies metadata filters for precision retrieval
+3. **Hybrid retrieval** - Two-path approach for maximum recall:
+   - **Path 1:** Metadata-filtered search (if filters extracted)
+   - **Path 2:** Semantic search with similarity threshold (0.3)
+   - Combines results, deduplicates, takes top 5 by similarity
+4. **Document analysis** - LLM analyzes each document for thesis utility
+   - Summary, key excerpt, thesis signal (bullish/bearish/neutral/mixed)
+   - Thesis utility explanation for investment use
+5. **Anti-hallucination safeguards** - Strict prompt rules prevent LLM from inventing documents
+   - "NEVER invent, fabricate, or hallucinate document titles or content"
+   - Must use exact titles from context, direct quotes only
+   - Returns "No documents found" if context is empty
+6. **Format context** - Inject retrieved document chunks into prompt
+7. **Stream response** - Server-Sent Events (SSE) for real-time token streaming
 
 **Models available:**
-- Claude Sonnet 4.6 (latest)
-- Claude Sonnet 4.5 (Sept 2025) — **default**
-- Claude Opus 4.6 (most powerful)
+- Claude Sonnet 4.5 (claude-sonnet-4-5-20250929) — **default**
+- Claude Opus 4.5 (claude-opus-4-5)
 - GPT-4o
+- GPT-4o Mini
 
 **Frontend:** `web/app/page.tsx` + `web/components/ChatInterface.tsx`
 - Streaming chat with SSE
-- Source citations shown inline
+- Source citations with analysis (summary, excerpt, thesis signal, thesis utility)
+- Query analysis display (shows extracted metadata)
 - Filter sidebar (sector, entities, sentiment)
 - Model selector
 - Session management
+- LangSmith feedback (thumbs up/down)
+
+**LangSmith Tracing:**
+- Enabled in production for debugging and monitoring
+- Tracks full RAG pipeline execution
+- User feedback collection via thumbs up/down
+- Project: `imprint-chatbot`
 
 ---
 
@@ -244,11 +309,13 @@ RETURNS TABLE (
 - **Auto-deploy:** GitHub main branch → Vercel (on push)
 - **Environment:** Next.js 14, Node 20
 
-### Ingestion (Local cron)
-- **Schedule:** Daily at 9pm (macOS cron)
-- **Command:** `0 7 * * * "/Users/lelandspeth/Data Initiatives/Imprint/run_ingestion.sh"`
-- **Note:** Cron says 7am but runs at 9pm due to timezone (PDT vs UTC)
+### Ingestion (Local launchd)
+- **Schedule:** Daily at 9pm (macOS launchd)
+- **Agent:** `~/Library/LaunchAgents/com.imprint.ingestion.plist`
+- **Advantage:** Catches up missed runs if Mac was asleep (unlike cron)
 - **Logs:** `logs/ingestion_YYYYMMDD_HHMMSS.log`
+- **Email summary:** Sent to `leland.speth@gmail.com` after each run
+- **Check status:** `launchctl list | grep imprint`
 
 ---
 
@@ -295,14 +362,16 @@ imprint/
 ├── ingest_pdf.py                 # PDF ingestion pipeline
 ├── ingest_vision.py              # Vision ingestion pipeline
 ├── ingest_all.py                 # Master orchestrator
-├── imprint_utils.py              # Shared utilities
-├── run_ingestion.sh              # Cron wrapper script
-├── delete_pending.py             # Admin: delete pending docs
+├── imprint_utils.py              # Shared utilities (cleaning, logging, email)
+├── run_ingestion.sh              # launchd wrapper script
+├── refresh_google_auth.py        # Tool: refresh Google OAuth tokens
 │
 ├── Imprint_Tag_Dictionary.md     # Tag schema documentation
 ├── DEPLOYMENT.md                 # Deployment guide
 ├── SYSTEM_OVERVIEW.md            # This file
 ├── .env                          # Environment variables (gitignored)
+├── token.json                    # Google OAuth token (gitignored)
+├── credentials.json              # Google OAuth credentials (gitignored)
 └── requirements.txt              # Python dependencies
 ```
 
@@ -310,16 +379,17 @@ imprint/
 
 ## Admin Utilities
 
-**Delete pending documents:**
+**Refresh Google OAuth tokens:**
 ```bash
-python3 delete_pending.py
+python3 refresh_google_auth.py
 ```
-Interactive script to delete all pending documents (useful for schema migrations).
+Run this if Gmail/Drive ingestion fails with "Token has been expired or revoked" error. Opens browser for re-authentication.
 
 **Run ingestion manually:**
 ```bash
 python3 ingest_all.py
 ```
+Runs all 4 pipelines and sends email summary.
 
 **Run single pipeline:**
 ```bash
@@ -328,6 +398,12 @@ python3 ingest_bookmark.py
 python3 ingest_pdf.py
 python3 ingest_vision.py
 ```
+
+**Check launchd status:**
+```bash
+launchctl list | grep imprint
+```
+Shows if ingestion agent is loaded (status 0 = running).
 
 ---
 
@@ -361,17 +437,20 @@ python3 ingest_vision.py
 
 ## Key Features
 
-### 1. Market-Linkable Tagging
+### 1. Market-Linkable Tagging with Structured Outputs
 - Entities use **tickers** for public companies (NVDA, AMZN)
 - Topics are **specific mechanisms** (not vague labels like "AI")
 - Sentiment captures directional tone
 - Catalyst window captures timing signals
+- **Pydantic + tool calling** ensures valid tags (no JSON parsing errors)
 
-### 2. Automated Ingestion
+### 2. Automated Ingestion with Error Prevention
 - 4 parallel pipelines ingest from different sources
-- Duplicate detection prevents re-ingestion
-- Parallel API bypasses paywalls and CAPTCHAs
-- Auto-tagging via LLM reduces manual work
+- Duplicate detection prevents re-ingestion (by source_url AND title)
+- LLM-based content cleaning removes ads/tracking/chrome
+- **Structured outputs** guarantee valid tags every time
+- **Google OAuth published app** - no more 7-day token expiration
+- launchd catches up missed runs if Mac was asleep
 
 ### 3. Tag Approval Workflow
 - Ultra-compact UI for fast review
@@ -379,14 +458,25 @@ python3 ingest_vision.py
 - Inline entity management
 - Source deletion for rejected documents
 
-### 4. Conversational RAG
+### 4. Hybrid RAG with Anti-Hallucination
+- **Hybrid retrieval:** Metadata filtering + semantic search (0.3 threshold)
+- **Query analysis:** Auto-extracts metadata from questions
+- **Document analysis:** LLM provides thesis utility for each result
+- **Anti-hallucination safeguards:** Strict prompt prevents invented documents
 - Streaming responses for low-latency UX
 - Conversational memory (follow-up questions)
-- Metadata filtering (sector, entities, sentiment)
-- Source citations with similarity scores
+- Source citations with similarity scores and analysis
 
-### 5. Production-Ready
+### 5. Thesis Notebook
+- Drag-and-drop citations from chat into structured theses
+- Multiple thesis management
+- Section-based organization
+- Export for presentation
+
+### 6. Production-Ready with Observability
 - Auto-deployment (GitHub → Vercel/Render)
+- **LangSmith tracing** for full pipeline visibility
+- User feedback collection (thumbs up/down)
 - Error logging and monitoring
 - Ingestion summaries via email
 - Health checks and uptime monitoring
