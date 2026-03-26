@@ -15,7 +15,7 @@ from googleapiclient.discovery import build
 from openai import OpenAI
 import anthropic
 import psycopg2
-from imprint_utils import log_ingestion, document_exists
+from imprint_utils import log_ingestion, document_exists, get_google_credentials
 
 # Load environment
 with open(os.path.join(os.path.dirname(__file__), '.env')) as f:
@@ -25,9 +25,7 @@ with open(os.path.join(os.path.dirname(__file__), '.env')) as f:
             os.environ[k] = v
 
 # Clients
-drive_creds = Credentials.from_authorized_user_file(
-    os.path.join(os.path.dirname(__file__), 'token.json')
-)
+drive_creds = get_google_credentials()
 drive = build('drive', 'v3', credentials=drive_creds)
 openai_client = OpenAI()
 anthropic_client = anthropic.Anthropic()

@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 from datetime import datetime
 import psycopg2
 from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
 # Load environment
@@ -19,6 +20,59 @@ if os.path.exists(ENV_PATH):
             if '=' in line and not line.startswith('#'):
                 k, v = line.strip().split('=', 1)
                 os.environ[k] = v
+
+
+def get_google_credentials():
+    """
+    Get Google OAuth credentials with automatic refresh.
+
+    Returns:
+        Credentials: Valid Google OAuth credentials
+
+    Raises:
+        Exception: If credentials are invalid and cannot be refreshed
+    """
+    token_path = os.path.join(os.path.dirname(__file__), 'token.json')
+
+    if not os.path.exists(token_path):
+        raise FileNotFoundError(
+            f"Token file not found at {token_path}. "
+            "Run 'python refresh_google_auth.py' to authenticate."
+        )
+
+    # Scopes needed for Imprint
+    scopes = [
+        'https://www.googleapis.com/auth/gmail.modify',
+        'https://www.googleapis.com/auth/gmail.send',
+        'https://www.googleapis.com/auth/drive.readonly'
+    ]
+
+    creds = Credentials.from_authorized_user_file(token_path, scopes)
+
+    # Check if credentials need refresh
+    if not creds.valid:
+        if creds.expired and creds.refresh_token:
+            try:
+                print("Token expired. Refreshing...")
+                creds.refresh(Request())
+
+                # Save refreshed token
+                with open(token_path, 'w') as token_file:
+                    token_file.write(creds.to_json())
+
+                print("✓ Token refreshed successfully")
+            except Exception as e:
+                raise Exception(
+                    f"Failed to refresh token: {e}\n"
+                    "Run 'python refresh_google_auth.py' to re-authenticate."
+                )
+        else:
+            raise Exception(
+                "Token is invalid and cannot be refreshed.\n"
+                "Run 'python refresh_google_auth.py' to re-authenticate."
+            )
+
+    return creds
 
 
 def get_db_connection():
@@ -134,9 +188,8 @@ def get_recent_ingestion_log(since_minutes=60):
 
 def send_ingestion_summary_email(to_email="leland.speth@gmail.com"):
     """Send email summary of recent ingestion."""
-    # Get Gmail credentials
-    token_path = os.path.join(os.path.dirname(__file__), 'token.json')
-    creds = Credentials.from_authorized_user_file(token_path)
+    # Get Gmail credentials with auto-refresh
+    creds = get_google_credentials()
     gmail = build('gmail', 'v1', credentials=creds)
 
     # Get recent logs and pending docs
