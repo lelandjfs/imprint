@@ -1,6 +1,6 @@
 # Imprint — System Overview
 
-**Last Updated:** March 17, 2026
+**Last Updated:** March 30, 2026
 
 ---
 
@@ -91,9 +91,11 @@ Imprint has 4 automated ingestion pipelines:
 
 ### Master Script
 - **`ingest_all.py`** orchestrates all 4 pipelines
-- **`run_ingestion.sh`** runs master script via launchd (9pm daily)
+- **`run_ingestion.sh`** wrapper script that:
+  - Quits Safari (required for bookmarks access)
+  - Runs master script via launchd (9:00 PM daily)
+  - Logs to `logs/ingestion_YYYYMMDD_HHMMSS.log`
 - **`refresh_google_auth.py`** - tool for refreshing Google OAuth tokens
-- Logs to `logs/ingestion_YYYYMMDD_HHMMSS.log`
 - Sends email summary after completion to `leland.speth@gmail.com`
 
 ### Ingestion Flow
@@ -109,9 +111,15 @@ Imprint has 4 automated ingestion pipelines:
 
 ### Google OAuth Token Management
 - **Published app** - no more 7-day token expiration
-- **Auto-refresh** - tokens persist long-term
+- **Auto-refresh** - tokens automatically refreshed before API calls via `get_google_credentials()`
 - **Manual refresh:** Run `python3 refresh_google_auth.py` if token expires
 - Tokens stored in `token.json` (gitignored)
+
+### Safari Bookmarks Access
+- **Full Disk Access required** - Python executable must have Full Disk Access permission
+- **Safari must be quit** - `run_ingestion.sh` automatically quits Safari before accessing bookmarks
+- Location: `/Library/Frameworks/Python.framework/Versions/3.13/bin/python3`
+- Grant access: System Settings → Privacy & Security → Full Disk Access
 
 ---
 
@@ -243,7 +251,8 @@ CREATE TABLE imprint_documents (
 
   -- Indexes
   CONSTRAINT sentiment_check CHECK (sentiment IN ('bullish', 'bearish', 'neutral', 'mixed')),
-  CONSTRAINT document_type_check CHECK (document_type IN ('article', 'blog', 'whitepaper', 'transcript', 'presentation', 'earnings', 'report', 'image', 'x_post', 'other'))
+  CONSTRAINT document_type_check CHECK (document_type IN ('article', 'blog', 'whitepaper', 'transcript', 'presentation', 'earnings', 'report', 'image', 'x_post', 'other')),
+  CONSTRAINT unique_source_url UNIQUE (source_url)  -- Prevents race condition duplicates
 );
 
 CREATE INDEX idx_status ON imprint_documents(status);
@@ -310,8 +319,9 @@ RETURNS TABLE (
 - **Environment:** Next.js 14, Node 20
 
 ### Ingestion (Local launchd)
-- **Schedule:** Daily at 9pm (macOS launchd)
+- **Schedule:** Daily at 9:00 PM (macOS launchd via `com.imprint.ingestion.plist`)
 - **Agent:** `~/Library/LaunchAgents/com.imprint.ingestion.plist`
+- **Scheduler:** Uses **launchd only** (no cron) to prevent race conditions
 - **Advantage:** Catches up missed runs if Mac was asleep (unlike cron)
 - **Logs:** `logs/ingestion_YYYYMMDD_HHMMSS.log`
 - **Email summary:** Sent to `leland.speth@gmail.com` after each run
@@ -353,7 +363,8 @@ imprint/
 │   ├── 001_add_investing_schema.sql
 │   ├── 002_update_rpc_sentiment.sql
 │   ├── 003_add_document_type_catalyst.sql
-│   └── 004_update_rpc_final_schema.sql
+│   ├── 004_update_rpc_final_schema.sql
+│   └── 008_add_unique_source_url_constraint.sql
 │
 ├── logs/                         # Ingestion logs (gitignored)
 │
@@ -446,10 +457,13 @@ Shows if ingestion agent is loaded (status 0 = running).
 
 ### 2. Automated Ingestion with Error Prevention
 - 4 parallel pipelines ingest from different sources
-- Duplicate detection prevents re-ingestion (by source_url AND title)
+- **Database-level duplicate prevention:** Unique constraint on `source_url` prevents race conditions
+- Application-level duplicate detection by source_url AND title
 - LLM-based content cleaning removes ads/tracking/chrome
 - **Structured outputs** guarantee valid tags every time
-- **Google OAuth published app** - no more 7-day token expiration
+- **Google OAuth auto-refresh** - tokens refresh automatically before API calls
+- **Safari bookmarks access** - Python has Full Disk Access, Safari auto-quit before ingestion
+- **Single scheduler** - launchd only (no cron) prevents concurrent runs
 - launchd catches up missed runs if Mac was asleep
 
 ### 3. Tag Approval Workflow
