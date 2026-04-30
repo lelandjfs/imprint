@@ -188,7 +188,7 @@ Document content (first 8000 chars):
 
     client = anthropic.Anthropic()
     response = client.messages.create(
-        model="claude-3-haiku-20240307",
+        model="claude-sonnet-4-5-20250929",
         max_tokens=1000,
         messages=[{"role": "user", "content": prompt}],
         tools=[{

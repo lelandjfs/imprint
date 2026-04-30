@@ -490,7 +490,7 @@ export default function ThesisNotebook() {
         fontFamily: "'Georgia', serif",
         userSelect: dragState ? "none" : "auto",
       }}
-      className="h-full flex overflow-hidden bg-white"
+      className="h-full flex overflow-hidden bg-gray-950"
     >
       {/* Chat Sidebar */}
       <ChatSidebar
@@ -508,7 +508,7 @@ export default function ThesisNotebook() {
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <h1
-                className="text-2xl font-bold text-gray-900"
+                className="text-2xl font-bold text-gray-100"
                 style={{ fontFamily: "'Georgia', serif" }}
               >
                 Thesis Notebook
@@ -524,14 +524,14 @@ export default function ThesisNotebook() {
                 <button
                   onClick={saveAllChanges}
                   disabled={saving}
-                  className="px-3 py-1.5 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors font-medium"
+                  className="px-3 py-1.5 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-medium"
                 >
                   {saving ? "Saving..." : "Save"}
                 </button>
               )}
               <button
                 onClick={handleCreateThesis}
-                className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="px-3 py-1.5 text-xs bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors font-medium"
               >
                 + New thesis
               </button>
@@ -540,9 +540,9 @@ export default function ThesisNotebook() {
 
 
           {theses.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">
+            <div className="text-center py-20 text-gray-500">
               <p className="mb-2">No theses yet</p>
-              <p className="text-xs">Click "+ New thesis" to get started</p>
+              <p className="text-xs text-gray-600">Click "+ New thesis" to get started</p>
             </div>
           ) : (
             theses.map((thesis) => (

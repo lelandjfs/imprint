@@ -339,7 +339,7 @@ def clean_ad_content(text, source_type='email'):
             client = anthropic.Anthropic()
 
             response = client.messages.create(
-                model="claude-3-haiku-20240307",
+                model="claude-sonnet-4-5-20250929",
                 max_tokens=4000,
                 messages=[{
                     "role": "user",
@@ -408,7 +408,7 @@ def clean_pdf_content(text, is_web_saved=False):
         client = anthropic.Anthropic()
 
         response = client.messages.create(
-            model="claude-3-haiku-20240307",
+            model="claude-sonnet-4-5-20250929",
             max_tokens=4000,
             messages=[{
                 "role": "user",

@@ -200,13 +200,13 @@ export default function TagApproval() {
   return (
     <div className="flex h-full">
       {/* Document List */}
-      <div className="w-96 border-r border-gray-200 overflow-y-auto">
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-900">
+      <div className="w-96 border-r border-gray-800 overflow-y-auto bg-gray-900">
+        <div className="p-4 border-b border-gray-800 bg-gray-950">
+          <h2 className="text-lg font-semibold text-gray-100">
             Pending Review ({documents.length})
           </h2>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-800">
           {documents.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               No documents pending review
@@ -216,25 +216,25 @@ export default function TagApproval() {
               <button
                 key={doc.id}
                 onClick={() => setSelectedDoc(doc)}
-                className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
-                  selectedDoc?.id === doc.id ? "bg-blue-50" : ""
+                className={`w-full p-4 text-left hover:bg-gray-800 transition-colors ${
+                  selectedDoc?.id === doc.id ? "bg-gray-800" : ""
                 }`}
               >
-                <div className="font-medium text-gray-900 mb-1 line-clamp-2">
+                <div className="font-medium text-gray-100 mb-1 line-clamp-2">
                   {doc.title}
                 </div>
-                <div className="text-sm text-gray-500 mb-2">
+                <div className="text-sm text-gray-400 mb-2">
                   {doc.source_type} •{" "}
                   {new Date(doc.ingested_date).toLocaleDateString()}
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {doc.sector && (
-                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                    <span className="px-2 py-0.5 bg-blue-900/30 text-blue-400 text-xs rounded">
                       {doc.sector}
                     </span>
                   )}
                   {doc.sentiment && (
-                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">
+                    <span className="px-2 py-0.5 bg-purple-900/30 text-purple-400 text-xs rounded">
                       {doc.sentiment}
                     </span>
                   )}
@@ -246,35 +246,35 @@ export default function TagApproval() {
       </div>
 
       {/* Document Detail */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-gray-950">
         {editedDoc ? (
           <div className="p-8">
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-100">
                   {editedDoc.title}
                 </h1>
                 {saveStatus !== "idle" && (
                   <div className="text-sm">
                     {saveStatus === "saving" && (
-                      <span className="text-blue-600">Saving...</span>
+                      <span className="text-blue-400">Saving...</span>
                     )}
                     {saveStatus === "saved" && (
-                      <span className="text-green-600">✓ Saved</span>
+                      <span className="text-emerald-400">✓ Saved</span>
                     )}
                     {saveStatus === "error" && (
-                      <span className="text-red-600">✗ Error</span>
+                      <span className="text-red-400">✗ Error</span>
                     )}
                   </div>
                 )}
               </div>
 
               {/* Editable Fields - Ultra Compact */}
-              <div className="bg-gray-50 rounded-lg p-3 mb-4">
+              <div className="bg-gray-900 rounded-lg p-3 mb-4 border border-gray-800">
                 <div className="grid grid-cols-3 gap-2 mb-2">
                   {/* Row 1: Topic, Sector, Sentiment */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-0.5">
+                    <label className="block text-xs font-medium text-gray-400 mb-0.5">
                       Topic
                     </label>
                     <input
@@ -282,15 +282,15 @@ export default function TagApproval() {
                       value={editedDoc.topic || ""}
                       onChange={(e) => handleFieldChange("topic", e.target.value)}
                       placeholder="ai_infrastructure"
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                      className="w-full px-2 py-1 text-xs border border-gray-700 bg-gray-800 text-gray-200 rounded focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-0.5">Sector</label>
+                    <label className="block text-xs font-medium text-gray-400 mb-0.5">Sector</label>
                     <select
                       value={editedDoc.sector || ""}
                       onChange={(e) => handleFieldChange("sector", e.target.value)}
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                      className="w-full px-2 py-1 text-xs border border-gray-700 bg-gray-800 text-gray-200 rounded focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                       <option value="">Select...</option>
                       {SECTOR_OPTIONS.map((sector) => (
@@ -301,11 +301,11 @@ export default function TagApproval() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-0.5">Sentiment</label>
+                    <label className="block text-xs font-medium text-gray-400 mb-0.5">Sentiment</label>
                     <select
                       value={editedDoc.sentiment || ""}
                       onChange={(e) => handleFieldChange("sentiment", e.target.value)}
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                      className="w-full px-2 py-1 text-xs border border-gray-700 bg-gray-800 text-gray-200 rounded focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                       <option value="">Select...</option>
                       {SENTIMENT_OPTIONS.map((sentiment) => (
@@ -318,11 +318,11 @@ export default function TagApproval() {
 
                   {/* Row 2: Doc Type, Catalyst, Weighting */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-0.5">Type</label>
+                    <label className="block text-xs font-medium text-gray-400 mb-0.5">Type</label>
                     <select
                       value={editedDoc.document_type || ""}
                       onChange={(e) => handleFieldChange("document_type", e.target.value)}
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                      className="w-full px-2 py-1 text-xs border border-gray-700 bg-gray-800 text-gray-200 rounded focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                       <option value="">Select...</option>
                       {DOCUMENT_TYPE_OPTIONS.map((type) => (
@@ -333,11 +333,11 @@ export default function TagApproval() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-0.5">Catalyst</label>
+                    <label className="block text-xs font-medium text-gray-400 mb-0.5">Catalyst</label>
                     <select
                       value={editedDoc.catalyst_window || ""}
                       onChange={(e) => handleFieldChange("catalyst_window", e.target.value || null)}
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                      className="w-full px-2 py-1 text-xs border border-gray-700 bg-gray-800 text-gray-200 rounded focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                       <option value="">None</option>
                       {CATALYST_WINDOW_OPTIONS.map((window) => (
@@ -348,7 +348,7 @@ export default function TagApproval() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-0.5">Weight</label>
+                    <label className="block text-xs font-medium text-gray-400 mb-0.5">Weight</label>
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map((weight) => (
                         <button
@@ -356,8 +356,8 @@ export default function TagApproval() {
                           onClick={() => handleFieldChange("weighting", weight)}
                           className={`flex-1 h-6 rounded text-xs font-medium transition-colors ${
                             editedDoc.weighting === weight
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              ? "bg-emerald-600 text-white"
+                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                           }`}
                         >
                           {weight}
@@ -369,17 +369,17 @@ export default function TagApproval() {
 
                 {/* Entities - compact inline */}
                 <div className="mb-2">
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Entities</label>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Entities</label>
                   <div className="flex flex-wrap gap-1 mb-1">
                     {editedDoc.entities.map((entity) => (
                       <span
                         key={entity}
-                        className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gray-200 text-gray-700 text-xs rounded"
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gray-800 text-gray-300 text-xs rounded"
                       >
                         {entity}
                         <button
                           onClick={() => removeEntity(entity)}
-                          className="text-gray-500 hover:text-red-600 text-sm"
+                          className="text-gray-500 hover:text-red-400 text-sm"
                         >
                           ×
                         </button>
@@ -393,11 +393,11 @@ export default function TagApproval() {
                       onChange={(e) => setNewEntity(e.target.value)}
                       onKeyPress={(e) => e.key === "Enter" && addEntity()}
                       placeholder="Add entity (Enter)"
-                      className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                      className="flex-1 px-2 py-1 text-xs border border-gray-700 bg-gray-800 text-gray-200 rounded focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                     />
                     <button
                       onClick={addEntity}
-                      className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                      className="px-3 py-1 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700"
                     >
                       Add
                     </button>
@@ -406,31 +406,31 @@ export default function TagApproval() {
 
                 {/* Summary - compact */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Summary</label>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Summary</label>
                   <textarea
                     value={editedDoc.summary || ""}
                     onChange={(e) => handleFieldChange("summary", e.target.value)}
                     rows={2}
                     placeholder="One sentence takeaway..."
-                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-2 py-1 text-xs border border-gray-700 bg-gray-800 text-gray-200 rounded focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               {/* Content Preview */}
               <div className="mb-8">
-                <h3 className="font-semibold text-gray-900 mb-2">Content Preview</h3>
-                <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap bg-gray-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-100 mb-2">Content Preview</h3>
+                <div className="prose prose-sm max-w-none text-gray-300 whitespace-pre-wrap bg-gray-900 border border-gray-800 rounded-lg p-4">
                   {editedDoc.content.slice(0, 2000)}
                   {editedDoc.content.length > 2000 && "..."}
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3 sticky bottom-0 bg-white py-4 border-t border-gray-200">
+              <div className="flex gap-3 sticky bottom-0 bg-gray-950 py-4 border-t border-gray-800">
                 <button
                   onClick={() => approveDocument(editedDoc.id)}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                 >
                   ✓ Approve
                 </button>
@@ -444,7 +444,7 @@ export default function TagApproval() {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
+          <div className="flex items-center justify-center h-full text-gray-500 bg-gray-950">
             Select a document to review
           </div>
         )}

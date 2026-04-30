@@ -5,7 +5,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import get_settings
-from routers import chat, filters, documents, theses
+from routers import chat, filters, documents, theses, markets
 
 # Configure logging
 logging.basicConfig(
@@ -51,6 +51,7 @@ app.include_router(chat.router)
 app.include_router(filters.router)
 app.include_router(documents.router)
 app.include_router(theses.router)
+app.include_router(markets.router)
 
 
 @app.get("/")

@@ -1,6 +1,31 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(grep:*)",
+      "Bash(python refresh_google_auth.py:*)",
+      "Bash(test:*)",
+      "Bash(launchctl list:*)",
+      "Bash(crontab:*)",
+      "Bash(/Library/Frameworks/Python.framework/Versions/3.13/bin/python3:*)",
+      "Bash(ls:*)",
+      "Bash(lsof:*)",
+      "Bash(psql:*)",
+      "Bash(log show --predicate \"subsystem == \"\"com.apple.launchd\"\" && eventMessage contains \"\"com.imprint.ingestion\"\"\" --last 7d --style syslog)",
+      "mcp__render__list_logs",
+      "Bash(ping:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(scutil --dns:*)",
+      "Bash(sudo dscacheutil:*)",
+      "Bash(sudo killall:*)",
+      "Bash(python3:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "langsmith"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }
